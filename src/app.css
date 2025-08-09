@@ -1,17 +1,17 @@
 @import 'tailwindcss';
 
 @layer utilities {
-    .heading-font {
-        font-family: "Bitcount Prop Single", system-ui;
-        font-optical-sizing: auto;
-        font-weight: 350;
-        font-style: normal;
-        font-variation-settings:
-                "slnt" 0,
-                "CRSV" 0.5,
-                "ELSH" 0,
-                "ELXP" 0;
-    }
+	.heading-font {
+		font-family: 'Bitcount Prop Single', system-ui;
+		font-optical-sizing: auto;
+		font-weight: 350;
+		font-style: normal;
+		font-variation-settings:
+			'slnt' 0,
+			'CRSV' 0.5,
+			'ELSH' 0,
+			'ELXP' 0;
+	}
 
 	.cursor-lighting {
 		cursor:
@@ -43,43 +43,39 @@
 			pointer;
 	}
 
-    h1 {
-        @apply text-4xl;
-        font-family: "Noto Sans", sans-serif;
-        font-optical-sizing: auto;
-        font-weight: 800;
-        font-style: normal;
-        font-variation-settings:
-                "wdth" 100;
-    }
+	h1 {
+		@apply text-4xl;
+		font-family: 'Noto Sans', sans-serif;
+		font-optical-sizing: auto;
+		font-weight: 800;
+		font-style: normal;
+		font-variation-settings: 'wdth' 100;
+	}
 
-    h2 {
-        @apply text-3xl font-semibold;
-        font-family: "Noto Sans", sans-serif;
-        font-optical-sizing: auto;
-        font-weight: 600;
-        font-style: normal;
-        font-variation-settings:
-                "wdth" 100;
-    }
+	h2 {
+		@apply text-3xl font-semibold;
+		font-family: 'Noto Sans', sans-serif;
+		font-optical-sizing: auto;
+		font-weight: 600;
+		font-style: normal;
+		font-variation-settings: 'wdth' 100;
+	}
 
-    h3 {
-        @apply text-2xl font-medium;
-        font-family: "Noto Sans", sans-serif;
-        font-optical-sizing: auto;
-        font-weight: 500;
-        font-style: normal;
-        font-variation-settings:
-                "wdth" 100;
-    }
+	h3 {
+		@apply text-2xl font-medium;
+		font-family: 'Noto Sans', sans-serif;
+		font-optical-sizing: auto;
+		font-weight: 500;
+		font-style: normal;
+		font-variation-settings: 'wdth' 100;
+	}
 
-    p {
-        @apply text-base;
-        font-family: "Roboto", sans-serif;
-        font-optical-sizing: auto;
-        font-weight: 400;
-        font-style: normal;
-        font-variation-settings:
-                "wdth" 100;
-    }
+	p {
+		@apply text-base;
+		font-family: 'Roboto', sans-serif;
+		font-optical-sizing: auto;
+		font-weight: 400;
+		font-style: normal;
+		font-variation-settings: 'wdth' 100;
+	}
 }

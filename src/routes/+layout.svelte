@@ -18,28 +18,28 @@
 <nav class="bg-gray-100 p-4 dark:bg-zinc-900">
 	<!-- Navigation bar -->
 	<div
-		class="container mx-auto flex flex-col items-center justify-between rounded-4xl border-2 border-y-gray-900 bg-linear-to-r/longer from-indigo-500 to-teal-400 dark:border-y-slate-200 dark:from-emerald-600 dark:to-slate-600"
+		class="container mx-auto flex flex-row items-center justify-between rounded-4xl border-2 border-y-gray-900 bg-linear-to-r/longer from-indigo-500 to-teal-400 dark:border-y-slate-200 dark:from-emerald-600 dark:to-slate-600"
 	>
 		<!-- Main container -->
-		<div class="mb-2 text-left text-7xl text-black dark:text-white">
+		<div class="px-4 text-left text-7xl text-black dark:text-white">
 			<!-- Logo -->
 			<a href="/" class="cursor-lighting heading-font">Portfolio</a>
 		</div>
 
 		<div
-			class="mt-4 flex-col items-center text-4xl text-black lg:mt-0 lg:flex lg:flex-row lg:space-x-4 dark:text-white heading-font"
+			class="heading-font flex-col items-center text-4xl text-black lg:mt-0 lg:flex lg:flex-row lg:space-x-4 dark:text-white"
 		>
 			<!-- Navigation links -->
-			<a href="/" class="cursor-house flex items-center space-x-2 px-4">
-				<House class="mr-1"/> Home
+			<a href="/" class="cursor-house flex items-center space-x-2 pr-4">
+				<House class="mr-1" /> Home
 			</a>
-			<a href="/guides" class="cursor-book flex items-center space-x-2 px-4">
+			<a href="/guides" class="cursor-book flex items-center space-x-2 pr-4">
 				<BookOpenText class="mr-1" /> Guides
 			</a>
-			<a href="/about" class="cursor-lens flex items-center space-x-2 px-4">
+			<a href="/about" class="cursor-lens flex items-center space-x-2 pr-4">
 				<Search class="mr-1" /> About
 			</a>
-			<a href="/contacts" class="cursor-phone flex items-center space-x-2 px-4">
+			<a href="/contacts" class="cursor-phone flex items-center space-x-2 pr-4">
 				<MessageSquareQuote class="mr-1" /> Contacts
 			</a>
 		</div>
