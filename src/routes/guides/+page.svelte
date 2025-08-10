@@ -5,3 +5,5 @@
 <svelte:head>
 	<title>{title} - Guides</title>
 </svelte:head>
+
+WIP I need to translate them in English.

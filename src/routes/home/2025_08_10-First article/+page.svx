@@ -1,0 +1,8 @@
+---
+layout: blog
+---
+<a href="/" class="text-xl py-4">🔙 Back to Home Page</a>
+
+# This is the first article of the home page
+
+I don't know how this site will turn out in the future.

@@ -17,9 +17,7 @@
 
 <nav class="bg-gray-100 not-dark:border-b-2 not-dark:border-gray-200 dark:bg-black">
 	<!-- Navigation bar -->
-	<div
-		class="container mx-auto flex flex-row items-center justify-between rounded-4xl"
-	>
+	<div class="container mx-auto flex flex-row items-center justify-between rounded-4xl">
 		<!-- Main container -->
 		<div class="px-4 text-left text-7xl transition duration-300 ease-in-out hover:scale-110">
 			<!-- Logo -->
@@ -30,16 +28,28 @@
 			class="heading-font flex-col items-center text-4xl lg:mt-0 lg:flex lg:flex-row lg:space-x-4"
 		>
 			<!-- Navigation links -->
-			<a href="/" class="cursor-house flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110">
+			<a
+				href="/"
+				class="cursor-house flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+			>
 				<House class="mr-1" /> Home
 			</a>
-			<a href="/guides" class="cursor-book flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110">
+			<a
+				href="/guides"
+				class="cursor-book flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+			>
 				<BookOpenText class="mr-1" /> Guides
 			</a>
-			<a href="/about" class="cursor-lens flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110">
+			<a
+				href="/about"
+				class="cursor-lens flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+			>
 				<Search class="mr-1" /> About
 			</a>
-			<a href="/contacts" class="cursor-phone flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110">
+			<a
+				href="/contacts"
+				class="cursor-phone flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+			>
 				<MessageSquareQuote class="mr-1" /> Contacts
 			</a>
 		</div>
@@ -49,9 +59,7 @@
 <div
 	class="container mx-auto min-h-screen min-w-screen bg-gray-100 text-black dark:bg-zinc-900 dark:text-white"
 >
-	<div
-		class="items-right flex flex-col justify-between sm:px-2 md:px-2 lg:px-4 xl:px-5 2xl:px-6"
-	>
+	<div class="items-right flex flex-col justify-between sm:px-2 md:px-2 lg:px-4 xl:px-5 2xl:px-6">
 		{@render children?.()}
 	</div>
 	<footer
