@@ -12,8 +12,6 @@
 				articles = data ?? [];
 			});
 	});
-
-	console.log(articles);
 </script>
 
 <svelte:head>
