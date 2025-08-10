@@ -67,22 +67,30 @@
 	>
 		<em>
 			© {new Date().getFullYear()} Mattia Gasparotto - Built with
-			<a href="https://bun.com/" target="_blank" rel="noopener">
-				<img src={bun} alt="Svelte" class="inline h-5 w-5 align-text-bottom" /><span
-					class="text-orange-100 not-dark:text-shadow-gray-600 not-dark:text-shadow-xs">Bun</span
+			<a href="https://bun.com/" target="_blank" rel="noopener" class="cursor-bun">
+				<img
+					src="https://skillicons.dev/icons?i=bun"
+					alt="Svelte"
+					class="inline h-5 w-5 align-text-bottom"
+				/><span class="text-orange-100 not-dark:text-shadow-gray-600 not-dark:text-shadow-xs"
+					>Bun</span
 				>
 			</a>
 			,
-			<a href="https://svelte.dev" target="_blank" rel="noopener">
-				<img src={svelte} alt="Svelte" class="inline h-5 w-5 align-text-bottom" /><span
-					class="text-orange-500">SvelteKit</span
-				>
+			<a href="https://svelte.dev" target="_blank" rel="noopener" class="cursor-svelte">
+				<img
+					src="https://skillicons.dev/icons?i=svelte"
+					alt="Svelte"
+					class="inline h-5 w-5 align-text-bottom"
+				/><span class="text-orange-500">SvelteKit</span>
 			</a>
 			and
-			<a href="https://tailwindcss.com/" target="_blank" rel="noopener">
-				<img src={tailwind} alt="Svelte" class="inline h-5 w-5 align-text-bottom" /><span
-					class="text-cyan-600">TailwindCSS</span
-				>
+			<a href="https://tailwindcss.com/" target="_blank" rel="noopener" class="cursor-tailwind">
+				<img
+					src="https://skillicons.dev/icons?i=tailwind"
+					alt="Svelte"
+					class="inline h-5 w-5 align-text-bottom"
+				/><span class="text-cyan-600">TailwindCSS</span>
 			</a>
 		</em>
 	</footer>

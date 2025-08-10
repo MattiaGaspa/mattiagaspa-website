@@ -43,6 +43,24 @@
 			pointer;
 	}
 
+	.cursor-bun {
+		cursor:
+			url('https://skillicons.dev/icons?i=bun') 15 0,
+			pointer;
+	}
+
+	.cursor-svelte {
+		cursor:
+			url('https://skillicons.dev/icons?i=svelte') 15 0,
+			pointer;
+	}
+
+	.cursor-tailwind {
+		cursor:
+			url('https://skillicons.dev/icons?i=tailwind') 15 0,
+			pointer;
+	}
+
 	h1 {
 		@apply mt-4 text-4xl font-bold;
 		font-family: 'Noto Sans', sans-serif;
