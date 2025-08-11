@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { title } from '$lib/config';
+	import { icons, title } from '$lib/config';
 	import { onMount } from 'svelte';
 
 	/** @type {string[][] | undefined} */
@@ -20,13 +20,19 @@
 <h1>My guides and notes:</h1>
 
 {#if guides}
-	<ul>
+	<div class="flex grid grid-cols-3 flex-col gap-4">
 		{#each guides as [name, description]}
-			<li>
-				<p><a href="/guides/guides/{name}">{name}</a>: {@html description}</p>
-			</li>
+			<div class="text-center text-lg">
+				{#if icons[name]}
+					<a href="/guides/guides/{name}"><img src={icons[name]} alt={name} class="inline max-h-30 max-w-30 align-text-bottom" /></a>
+				{:else}
+					<a href="/guides/guides/{name}"><span class="inline h-5 w-5 align-text-bottom">❓</span></a>
+				{/if}
+				<h2><a href="/guides/guides/{name}">{name}</a></h2>
+				<p>{@html description}</p>
+			</div>
 		{/each}
-	</ul>
+	</div>
 {:else}
 	<li>Loading guides...</li>
 {/if}

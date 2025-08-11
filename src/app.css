@@ -13,36 +13,6 @@
 			'ELXP' 0;
 	}
 
-	.cursor-lighting {
-		cursor:
-			url('https://fav.farm/⚡') 15 0,
-			pointer;
-	}
-
-	.cursor-house {
-		cursor:
-			url('https://fav.farm/🏠') 15 0,
-			pointer;
-	}
-
-	.cursor-book {
-		cursor:
-			url('https://fav.farm/📚') 15 0,
-			pointer;
-	}
-
-	.cursor-lens {
-		cursor:
-			url('https://fav.farm/🔍') 15 0,
-			pointer;
-	}
-
-	.cursor-phone {
-		cursor:
-			url('https://fav.farm/📱') 15 0,
-			pointer;
-	}
-
 	.cursor-bun {
 		cursor:
 			url('https://skillicons.dev/icons?i=bun') 15 0,

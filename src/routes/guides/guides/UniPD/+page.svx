@@ -1,0 +1,16 @@
+---
+layout: blog
+---
+
+<a href="/guides" class="text-xl py-4">🔙 Back to Guides Page</a>
+
+# University of Padua (UniPD) Notes
+
+I started my Bachelor's degree in Computer Engineering at the University of Padua in 2023. My notes are compiled from:
+- Professors' lecture slides
+- In-class explanations
+- Recommended textbooks
+
+You can find the complete list of course professors [here](https://didattica.unipd.it/off/2023/LT/IN/IN0508).
+
+My Drive folder with all my notes is available [here](https://drive.google.com/drive/folders/1_uVeRsQVpTflb2XQNf5NtEqwHd84CQtU?usp=sharing).

@@ -1,9 +1,7 @@
 <script lang="ts">
 	import '../app.css';
-	import svelte from '$lib/assets/svelte-favicon.svg';
-	import tailwind from '$lib/assets/tailwind-favicon.png';
-	import bun from '$lib/assets/bun-favicon.ico';
 	import { House, BookOpenText, Search, MessageSquareQuote } from '@lucide/svelte';
+	import { icons } from '$lib/config';
 
 	let { children } = $props();
 </script>
@@ -21,7 +19,7 @@
 		<!-- Main container -->
 		<div class="px-4 text-left text-7xl transition duration-300 ease-in-out hover:scale-110">
 			<!-- Logo -->
-			<a href="/" class="cursor-lighting heading-font">$ Portfolio</a>
+			<a href="/" class="heading-font">$ Portfolio</a>
 		</div>
 
 		<div
@@ -30,25 +28,25 @@
 			<!-- Navigation links -->
 			<a
 				href="/"
-				class="cursor-house flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
 				<House class="mr-1" /> Home
 			</a>
 			<a
 				href="/guides"
-				class="cursor-book flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
 				<BookOpenText class="mr-1" /> Guides
 			</a>
 			<a
 				href="/about"
-				class="cursor-lens flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
 				<Search class="mr-1" /> About
 			</a>
 			<a
 				href="/contacts"
-				class="cursor-phone flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
 				<MessageSquareQuote class="mr-1" /> Contacts
 			</a>
@@ -68,29 +66,21 @@
 		<em>
 			© {new Date().getFullYear()} Mattia Gasparotto - Built with
 			<a href="https://bun.com/" target="_blank" rel="noopener" class="cursor-bun">
-				<img
-					src="https://skillicons.dev/icons?i=bun"
-					alt="Svelte"
-					class="inline h-5 w-5 align-text-bottom"
-				/><span class="text-orange-100 not-dark:text-shadow-gray-600 not-dark:text-shadow-xs"
-					>Bun</span
+				<img src={icons['bun']} alt="Bun" class="inline h-5 w-5 align-text-bottom" /><span
+					class="text-orange-100 not-dark:text-shadow-gray-600 not-dark:text-shadow-xs">Bun</span
 				>
 			</a>
 			,
 			<a href="https://svelte.dev" target="_blank" rel="noopener" class="cursor-svelte">
-				<img
-					src="https://skillicons.dev/icons?i=svelte"
-					alt="Svelte"
-					class="inline h-5 w-5 align-text-bottom"
-				/><span class="text-orange-500">SvelteKit</span>
+				<img src={icons['svelte']} alt="Svelte" class="inline h-5 w-5 align-text-bottom" /><span
+					class="text-orange-500">SvelteKit</span
+				>
 			</a>
 			and
 			<a href="https://tailwindcss.com/" target="_blank" rel="noopener" class="cursor-tailwind">
-				<img
-					src="https://skillicons.dev/icons?i=tailwind"
-					alt="Svelte"
-					class="inline h-5 w-5 align-text-bottom"
-				/><span class="text-cyan-600">TailwindCSS</span>
+				<img src={icons['tailwind']} alt="Tailwind" class="inline h-5 w-5 align-text-bottom" /><span
+					class="text-cyan-600">TailwindCSS</span
+				>
 			</a>
 		</em>
 	</footer>

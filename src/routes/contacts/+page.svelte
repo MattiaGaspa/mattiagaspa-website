@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { title } from '$lib/config';
-	import Telegram from '$lib/assets/telegram.png';
+	import { icons, title } from '$lib/config';
 </script>
 
 <svelte:head>
@@ -11,17 +10,15 @@
 <ul class="text-2xl">
 	<li>
 		<a href="mailto:gasmat04@gmail.com" rel="noopener" target="_blank"
-			><img
-				src="https://skillicons.dev/icons?i=gmail"
-				alt="Email"
-				class="align-text-center mr-2 inline h-10 w-10"
-			/><span>Email</span></a
+			><img src={icons['gmail']} alt="Email" class="align-text-center mr-2 inline h-10 w-10" /><span
+				>Email</span
+			></a
 		>
 	</li>
 	<li>
 		<a href="https://github.com/MattiaGaspa" rel="noopener" target="_blank"
 			><img
-				src="https://skillicons.dev/icons?i=github"
+				src={icons['github']}
 				alt="Github"
 				class="align-text-center mr-2 inline h-10 w-10"
 			/><span>Github</span></a
@@ -29,15 +26,17 @@
 	</li>
 	<li>
 		<a href="https://t.me/MattiaGaspa" rel="noopener" target="_blank"
-			><img src={Telegram} alt="Telegram" class="align-text-center mr-2 inline h-10 w-10" /><span
-				>Telegram</span
-			></a
+			><img
+				src={icons['telegram']}
+				alt="Telegram"
+				class="align-text-center mr-2 inline h-10 w-10"
+			/><span>Telegram</span></a
 		>
 	</li>
 	<li>
 		<a href="https://it.linkedin.com/in/mattia-gasparotto-aa3389360" rel="noopener" target="_blank"
 			><img
-				src="https://skillicons.dev/icons?i=linkedin"
+				src={icons['linkedin']}
 				alt="Linkedin"
 				class="align-text-center mr-2 inline h-10 w-10"
 			/><span>Linkedin</span></a
