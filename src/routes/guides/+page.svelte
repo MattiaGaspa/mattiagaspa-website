@@ -24,9 +24,17 @@
 		{#each guides as [name, description]}
 			<div class="text-center text-lg">
 				{#if icons[name]}
-					<a href="/guides/guides/{name}"><img src={icons[name]} alt={name} class="inline max-h-30 max-w-30 align-text-bottom" /></a>
+					<a href="/guides/guides/{name}"
+						><img
+							src={icons[name]}
+							alt={name}
+							class="inline max-h-30 max-w-30 align-text-bottom"
+						/></a
+					>
 				{:else}
-					<a href="/guides/guides/{name}"><span class="inline h-5 w-5 align-text-bottom">❓</span></a>
+					<a href="/guides/guides/{name}"
+						><span class="inline h-5 w-5 align-text-bottom">❓</span></a
+					>
 				{/if}
 				<h2><a href="/guides/guides/{name}">{name}</a></h2>
 				<p>{@html description}</p>

@@ -19,7 +19,9 @@
 		<!-- Main container -->
 		<div class="px-4 text-left text-7xl transition duration-300 ease-in-out hover:scale-110">
 			<!-- Logo -->
-			<a href="/" class="heading-font">$ Portfolio</a>
+			<a href="/" class="heading-font flex items-center"
+				><span class="mr-2 hidden sm:inline">$</span> Portfolio</a
+			>
 		</div>
 
 		<div
@@ -30,25 +32,25 @@
 				href="/"
 				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
-				<House class="mr-1" /> Home
+				<House class="mr-1" /><span class="hidden sm:inline">Home</span>
 			</a>
 			<a
 				href="/guides"
 				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
-				<BookOpenText class="mr-1" /> Guides
+				<BookOpenText class="mr-1" /><span class="hidden sm:inline">Guides</span>
 			</a>
 			<a
 				href="/about"
 				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
-				<Search class="mr-1" /> About
+				<Search class="mr-1" /><span class="hidden sm:inline">About</span>
 			</a>
 			<a
 				href="/contacts"
 				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
-				<MessageSquareQuote class="mr-1" /> Contacts
+				<MessageSquareQuote class="mr-1" /><span class="hidden sm:inline">Contacts</span>
 			</a>
 		</div>
 	</div>
