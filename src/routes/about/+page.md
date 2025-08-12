@@ -1,6 +1,11 @@
----
-layout: blog
----
+<script lang="ts">
+  import { title } from '$lib/config.ts';
+</script>
+
+<svelte:head>
+  <title> { title } - About Me</title>
+  <meta name="description" content="Learn more about Mattia, a student at the University of Padua, and his journey in technology and programming." />
+</svelte:head>
 
 # About Me
 
@@ -17,6 +22,7 @@ After high school, I started studying [Computer Engineering](https://www.unipd.i
 ## Technical Skills
 
 Currently, for my personal projects, I'm using, and learning, various languages, frameworks and tools, including:
+
 - **Rust**: for backend development, with the **[Actix](https://actix.rs/)** framework;
 - **Golang**: for network programming and DevOps tasks;
 - **Java**: for university;
@@ -26,8 +32,9 @@ Currently, for my personal projects, I'm using, and learning, various languages,
 ## Beyond Studying
 
 When I'm not using a computer, I'm passionate about playing the trumpet. I currently own two trumpets:
-- *Yamaha YTR-3335*: bought in 2013 and it's my first trumpet;
-- *Getzen 490-LV*: bought the 25th of February, 2023 and it's my current trumpet.
+
+- _Yamaha YTR-3335_: bought in 2013 and it's my first trumpet;
+- _Getzen 490-LV_: bought the 25th of February, 2023 and it's my current trumpet.
 
 > "He who desires but acts not, breeds pestilence."
-> — William Blake, *Proverbs of Hell*
+> — William Blake, _Proverbs of Hell_

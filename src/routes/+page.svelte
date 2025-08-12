@@ -1,17 +1,8 @@
 <script lang="js">
 	import { title } from '$lib/config';
-	import { onMount } from 'svelte';
-	import Article from '$lib/components/Article.svelte';
+	import { formatDate } from '$lib/utils';
 
-	/** @type {string[][] | undefined} */
-	let articles = $state();
-	onMount(() => {
-		fetch('/api/getArticles')
-			.then((response) => response.json())
-			.then((data) => {
-				articles = data ?? [];
-			});
-	});
+	let { data } = $props();
 </script>
 
 <svelte:head>
@@ -20,10 +11,10 @@
 
 <h1>Welcome to {title}</h1>
 <h2>Recent posts from me:</h2>
-{#if articles}
-	{#each articles as article (article[0])}
-		<Article dir={article[0]} date={article[1]} title={article[2]} />
-	{/each}
-{:else}
-	<p>Loading articles...</p>
-{/if}
+{#each data.posts as post}
+	<article class="my-4 rounded-xl border bg-emerald-100 px-4 pb-4 dark:bg-zinc-700">
+		<h2>{post.title}</h2>
+		<p>Published on {post.date}</p>
+		<p>{post.description} <a href={post.slug}>Read more</a></p>
+	</article>
+{/each}

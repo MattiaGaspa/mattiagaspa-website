@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { icons, title } from '$lib/config';
+	import { title } from '$lib/config';
+	import { icons } from '$lib/utils';
 </script>
 
 <svelte:head>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { House, BookOpenText, Search, MessageSquareQuote } from '@lucide/svelte';
-	import { icons } from '$lib/config';
+	import { icons } from '$lib/utils';
 
 	let { children } = $props();
 </script>
@@ -17,7 +17,7 @@
 	<!-- Navigation bar -->
 	<div class="container mx-auto flex flex-row items-center justify-between rounded-4xl">
 		<!-- Main container -->
-		<div class="px-4 text-left text-7xl transition duration-300 ease-in-out hover:scale-110">
+		<div class="px-4 pt-2 text-left text-7xl transition duration-300 ease-in-out hover:scale-110">
 			<!-- Logo -->
 			<a href="/" class="heading-font flex items-center"
 				><span class="mr-2 hidden sm:inline">$</span> Portfolio</a
@@ -59,9 +59,11 @@
 <div
 	class="container mx-auto min-h-screen min-w-screen bg-gray-100 text-black dark:bg-zinc-900 dark:text-white"
 >
-	<div class="items-right flex flex-col justify-between sm:px-2 md:px-2 lg:px-4 xl:px-5 2xl:px-6">
-		{@render children?.()}
-	</div>
+	<main>
+		<div class="items-right flex flex-col justify-between sm:px-2 md:px-2 lg:px-4 xl:px-5 2xl:px-6">
+			{@render children?.()}
+		</div>
+	</main>
 	<footer
 		class="mt-8 flex items-center justify-center p-4 text-sm text-gray-600 dark:text-gray-400"
 	>
@@ -69,19 +71,19 @@
 			© {new Date().getFullYear()} Mattia Gasparotto - Built with
 			<a href="https://bun.com/" target="_blank" rel="noopener" class="cursor-bun">
 				<img src={icons['bun']} alt="Bun" class="inline h-5 w-5 align-text-bottom" /><span
-					class="text-orange-100 not-dark:text-shadow-gray-600 not-dark:text-shadow-xs">Bun</span
+					class="text-orange-100 not-dark:text-shadow-gray-600 not-dark:text-shadow-xs pl-1">Bun</span
 				>
 			</a>
 			,
 			<a href="https://svelte.dev" target="_blank" rel="noopener" class="cursor-svelte">
 				<img src={icons['svelte']} alt="Svelte" class="inline h-5 w-5 align-text-bottom" /><span
-					class="text-orange-500">SvelteKit</span
+					class="text-orange-500 pl-1">SvelteKit</span
 				>
 			</a>
 			and
 			<a href="https://tailwindcss.com/" target="_blank" rel="noopener" class="cursor-tailwind">
 				<img src={icons['tailwind']} alt="Tailwind" class="inline h-5 w-5 align-text-bottom" /><span
-					class="text-cyan-600">TailwindCSS</span
+					class="text-cyan-600 pl-1">TailwindCSS</span
 				>
 			</a>
 		</em>

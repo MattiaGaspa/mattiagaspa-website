@@ -1,1 +1,0 @@
-These notes are based of the SQL book <a href="https://www.amazon.com/SQL-Programming-Database-Management-Systems/dp/0131873253" target="_blank">Learning SQL: Generate, Manipulate, and Retrieve Data by Alan Beaulieu</a>.
