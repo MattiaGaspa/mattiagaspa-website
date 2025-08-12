@@ -20,15 +20,15 @@
 <h1>My guides and notes:</h1>
 
 {#if guides}
-	<div class="flex grid grid-cols-3 flex-col gap-4">
+	<div class="flex grid grid-cols-3 flex-col gap-4 gap-y-10 mb-3">
 		{#each guides as [name, description]}
-			<div class="text-center text-lg">
+			<div class="text-center text-lg transition duration-300 ease-in-out hover:scale-105">
 				{#if icons[name]}
 					<a href="/guides/guides/{name}"
 						><img
 							src={icons[name]}
 							alt={name}
-							class="inline max-h-30 max-w-30 align-text-bottom"
+							class="inline align-text-bottom h-full max-h-30 max-w-30 object-contain scale-125"
 						/></a
 					>
 				{:else}
