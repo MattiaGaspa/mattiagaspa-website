@@ -3,6 +3,7 @@
 </script>
 
 <svelte:head>
+
   <title> { title } - About Me</title>
   <meta name="description" content="Learn more about Mattia, a student at the University of Padua, and his journey in technology and programming." />
 </svelte:head>

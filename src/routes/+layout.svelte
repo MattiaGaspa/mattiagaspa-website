@@ -71,19 +71,20 @@
 			© {new Date().getFullYear()} Mattia Gasparotto - Built with
 			<a href="https://bun.com/" target="_blank" rel="noopener" class="cursor-bun">
 				<img src={icons['bun']} alt="Bun" class="inline h-5 w-5 align-text-bottom" /><span
-					class="text-orange-100 not-dark:text-shadow-gray-600 not-dark:text-shadow-xs pl-1">Bun</span
+					class="pl-1 text-orange-100 not-dark:text-shadow-gray-600 not-dark:text-shadow-xs"
+					>Bun</span
 				>
 			</a>
 			,
 			<a href="https://svelte.dev" target="_blank" rel="noopener" class="cursor-svelte">
 				<img src={icons['svelte']} alt="Svelte" class="inline h-5 w-5 align-text-bottom" /><span
-					class="text-orange-500 pl-1">SvelteKit</span
+					class="pl-1 text-orange-500">SvelteKit</span
 				>
 			</a>
 			and
 			<a href="https://tailwindcss.com/" target="_blank" rel="noopener" class="cursor-tailwind">
 				<img src={icons['tailwind']} alt="Tailwind" class="inline h-5 w-5 align-text-bottom" /><span
-					class="text-cyan-600 pl-1">TailwindCSS</span
+					class="pl-1 text-cyan-600">TailwindCSS</span
 				>
 			</a>
 		</em>
