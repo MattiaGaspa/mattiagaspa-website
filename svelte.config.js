@@ -9,11 +9,11 @@ const mdsvexOptions = {
 	highlight: {
 		highlighter: async (code, lang) => {
 			const highlighter = await createHighlighter({
-				themes: ['poimandres'],
+				themes: ['github-dark'],
 				langs: ['bash', 'go', 'java', 'javascript', 'python', 'rust', 'sql', 'typescript', 'xml']
 			});
 			await highlighter.loadLanguage('javascript', 'typescript');
-			const html = escapeSvelte(highlighter.codeToHtml(code, { lang, theme: 'poimandres' }));
+			const html = escapeSvelte(highlighter.codeToHtml(code, { lang, theme: 'github-dark' }));
 			return `{@html \`${html}\` }`;
 		}
 	}

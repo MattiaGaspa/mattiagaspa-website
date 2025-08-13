@@ -13,7 +13,7 @@
 	/>
 </svelte:head>
 
-<nav class="bg-gray-100 not-dark:border-b-2 not-dark:border-gray-200 dark:bg-black">
+<nav class="bg-gray-100 not-dark:border-b-2 not-dark:border-gray-600 dark:bg-black">
 	<!-- Navigation bar -->
 	<div class="container mx-auto flex flex-row items-center justify-between rounded-4xl">
 		<!-- Main container -->
@@ -56,37 +56,30 @@
 	</div>
 </nav>
 
-<div
-	class="container mx-auto min-h-screen min-w-screen bg-gray-100 text-black dark:bg-zinc-900 dark:text-white"
->
-	<main>
-		<div class="items-right flex flex-col justify-between sm:px-2 md:px-2 lg:px-4 xl:px-5 2xl:px-6">
-			{@render children?.()}
-		</div>
-	</main>
-	<footer
-		class="mt-8 flex items-center justify-center p-4 text-sm text-gray-600 dark:text-gray-400"
-	>
-		<em>
-			© {new Date().getFullYear()} Mattia Gasparotto - Built with
-			<a href="https://bun.com/" target="_blank" rel="noopener" class="cursor-bun">
-				<img src={icons['bun']} alt="Bun" class="inline h-5 w-5 align-text-bottom" /><span
-					class="pl-1 text-orange-100 not-dark:text-shadow-gray-600 not-dark:text-shadow-xs"
-					>Bun</span
-				>
-			</a>
-			,
-			<a href="https://svelte.dev" target="_blank" rel="noopener" class="cursor-svelte">
-				<img src={icons['svelte']} alt="Svelte" class="inline h-5 w-5 align-text-bottom" /><span
-					class="pl-1 text-orange-500">SvelteKit</span
-				>
-			</a>
-			and
-			<a href="https://tailwindcss.com/" target="_blank" rel="noopener" class="cursor-tailwind">
-				<img src={icons['tailwind']} alt="Tailwind" class="inline h-5 w-5 align-text-bottom" /><span
-					class="pl-1 text-cyan-600">TailwindCSS</span
-				>
-			</a>
-		</em>
-	</footer>
-</div>
+<main>
+	<div class="items-right flex flex-col justify-between p-2 sm:p-2 md:p-2 lg:p-4 xl:p-5 2xl:p-6">
+		{@render children?.()}
+	</div>
+</main>
+<footer class="mt-8 flex items-center justify-center p-4 text-sm text-gray-600 dark:text-gray-400">
+	<em>
+		© {new Date().getFullYear()} Mattia Gasparotto - Built with
+		<a href="https://bun.com/" target="_blank" rel="noopener" class="cursor-bun">
+			<img src={icons['bun']} alt="Bun" class="inline h-5 w-5 align-text-bottom" /><span
+				class="pl-1 text-orange-100 not-dark:text-shadow-gray-600 not-dark:text-shadow-xs">Bun</span
+			>
+		</a>
+		,
+		<a href="https://svelte.dev" target="_blank" rel="noopener" class="cursor-svelte">
+			<img src={icons['svelte']} alt="Svelte" class="inline h-5 w-5 align-text-bottom" /><span
+				class="pl-1 text-orange-500">SvelteKit</span
+			>
+		</a>
+		and
+		<a href="https://tailwindcss.com/" target="_blank" rel="noopener" class="cursor-tailwind">
+			<img src={icons['tailwind']} alt="Tailwind" class="inline h-5 w-5 align-text-bottom" /><span
+				class="pl-1 text-cyan-600">TailwindCSS</span
+			>
+		</a>
+	</em>
+</footer>
