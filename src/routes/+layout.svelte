@@ -24,31 +24,29 @@
 			>
 		</div>
 
-		<div
-			class="heading-font flex-col items-center text-4xl lg:mt-0 lg:flex lg:flex-row lg:space-x-4"
-		>
+		<div class="flex-col items-center text-4xl lg:mt-0 lg:flex lg:flex-row lg:space-x-4">
 			<!-- Navigation links -->
 			<a
 				href="/"
-				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+				class="heading-font flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
 				<House class="mr-1" /><span class="hidden sm:inline">Home</span>
 			</a>
 			<a
 				href="/guides"
-				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+				class="heading-font flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
 				<BookOpenText class="mr-1" /><span class="hidden sm:inline">Guides</span>
 			</a>
 			<a
 				href="/about"
-				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+				class=" heading-font flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
 				<Search class="mr-1" /><span class="hidden sm:inline">About</span>
 			</a>
 			<a
 				href="/contacts"
-				class="flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
+				class="heading-font flex items-center space-x-2 pr-4 transition duration-300 ease-in-out hover:scale-110"
 			>
 				<MessageSquareQuote class="mr-1" /><span class="hidden sm:inline">Contacts</span>
 			</a>

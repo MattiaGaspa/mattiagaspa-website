@@ -16,7 +16,7 @@ I'm a student of the University of Padua. I love learning about and using new to
 
 ## My Story
 
-My passion for technology started when I was young, by watching my father work with electronics. Later, in high school, I studied electronics, focused on automation (e.g. PLCs, sensors, and actuators), while studying a bit of computer science by myself.
+My passion for technology started when I was young, by watching my father work with electronics. Later, in high school, I studied electronics, focused on automation (e.g. PLCs, sensors, and actuators), while self-studying computer science.
 
 After high school, I started studying [Computer Engineering](https://www.unipd.it/offerta-didattica/corsi-di-laurea-triennale/ingegneria?tipo=L&scuola=IN&ordinamento=2020&key=IN0508) at the University of Padua.
 
@@ -35,7 +35,7 @@ Currently, for my personal projects, I'm using, and learning, various languages,
 When I'm not using a computer, I'm passionate about playing the trumpet. I currently own two trumpets:
 
 - _Yamaha YTR-3335_: bought in 2013 and it's my first trumpet;
-- _Getzen 490-LV_: bought the 25th of February, 2023 and it's my current trumpet.
+- _Getzen 490-LV_: bought on February 25th, 2023 and it's my current trumpet.
 
 > "He who desires but acts not, breeds pestilence."
 > — William Blake, _Proverbs of Hell_

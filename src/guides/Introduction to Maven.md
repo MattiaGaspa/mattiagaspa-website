@@ -7,7 +7,7 @@ published: true
 
 Maven is used to manage dependencies and the process of compiling and executing a Java project.
 
-# Project Creation
+## Project Creation
 
 The project is created using the [archetype](https://maven.apache.org/guides/introduction/introduction-to-archetypes.html) **quickstart** and the command
 
@@ -102,7 +102,7 @@ my-app
                        └── AppTest.java
 ```
 
-# Project compilation
+## Project compilation
 
 The project is compiled using the command:
 
@@ -112,7 +112,7 @@ mvn compile
 
 After downloading all plugins and dependencies, if they are not already present in the system, it will place the compiled files in `${project.basedir}/target/classes`.
 
-# Run unit tests
+## Run unit tests
 
 To run the unit tests, use the command:
 
@@ -126,7 +126,7 @@ Maven will then download development dependencies, in addition to those required
 mvn test-compile
 ```
 
-# Create a JAR and install it locally
+## Create a JAR and install it locally
 
 The JAR file is created using the command:
 
