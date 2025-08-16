@@ -3,17 +3,22 @@ import { createHighlighter } from 'shiki';
 import adapter from '@sveltejs/adapter-netlify';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
+// Singleton Shiki highlighter
+let globalHighlighter = null;
+
 /** @type {import('mdsvex').MdsvexOptions} */
 const mdsvexOptions = {
 	extensions: ['.md'],
 	highlight: {
 		highlighter: async (code, lang) => {
-			const highlighter = await createHighlighter({
-				themes: ['github-dark'],
-				langs: ['bash', 'go', 'java', 'javascript', 'python', 'rust', 'sql', 'typescript', 'xml']
-			});
-			await highlighter.loadLanguage('javascript', 'typescript');
-			const html = escapeSvelte(highlighter.codeToHtml(code, { lang, theme: 'github-dark' }));
+			if (!globalHighlighter) {
+				globalHighlighter = await createHighlighter({
+					themes: ['github-dark'],
+					langs: ['bash', 'go', 'java', 'javascript', 'python', 'rust', 'sql', 'typescript', 'xml']
+				});
+				await globalHighlighter.loadLanguage('javascript', 'typescript');
+			}
+			const html = escapeSvelte(globalHighlighter.codeToHtml(code, { lang, theme: 'github-dark' }));
 			return `{@html \`${html}\` }`;
 		}
 	}
@@ -21,8 +26,6 @@ const mdsvexOptions = {
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	// Consult https://svelte.dev/docs/kit/integrations
-	// for more information about preprocessors
 	preprocess: [vitePreprocess(), mdsvex(mdsvexOptions)],
 	kit: { adapter: adapter() },
 	extensions: ['.svelte', '.md']
