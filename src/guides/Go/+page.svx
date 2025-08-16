@@ -1,9 +1,0 @@
----
-layout: blog
----
-
-<a href="/guides" class="text-xl py-4">🔙 Back to Guides Page</a>
-
-# Go
-
-WIP

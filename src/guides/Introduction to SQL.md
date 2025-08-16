@@ -5,19 +5,19 @@ language: SQL
 published: true
 ---
 
-## Background
+# Background
 
-### Type of databases
+## Type of databases
 
 Originally databases where represented with _hierarchical database system_:
 
-![](/SQL/1.png)
+![](/Introduction-to-SQL/1.png)
 
 This structure is also known as _single-parent hierarchy_ since every account has its own transactions.
 
 Another implementation is given by the _network database system_:
 
-![](/SQL/2.png)
+![](/Introduction-to-SQL/2.png)
 
 To find Sue's money market account transactions, you would need to:
 
@@ -28,7 +28,7 @@ To find Sue's money market account transactions, you would need to:
 
 The _relational model_, proposed in 1970, represents data in tables:
 
-![](/SQL/3.png)
+![](/Introduction-to-SQL/3.png)
 
 Each table represents an entity, and each table records specific data that is useful to the entity.
 
@@ -39,7 +39,7 @@ Each table contains a column that contains a value that identifies the identity,
 
 Keys that are used to navigate to another table are called _foreign keys_.
 
-### Terminologies
+## Terminologies
 
 - Entity: something of interest that is to be saved in the database;
 - Column: a piece of data that is saved in the database;
@@ -49,7 +49,7 @@ Keys that are used to navigate to another table are called _foreign keys_.
 - Primary key: one or more columns that are used as a unique identifier for the entity;
 - Foreign key: one or more columns that can be used to identify a row in another column.
 
-## Create and populate a database
+# Create and populate a database
 
 First, you need to install a version of the `MySQL` server.
 For this chapter, you must load the sample database _Sakila_: [link](https://dev.mysql.com/doc/index-other.html). The database is loaded on the MySQL console using the commands
@@ -83,7 +83,7 @@ To get the current time type:
 SELECT now();
 ```
 
-### Datatypes
+## Datatypes
 
 The data types present in MySQL, which are usually found in the vast majority of other SQL servers, are:
 
@@ -119,9 +119,9 @@ The data types present in MySQL, which are usually found in the vast majority of
   - `year`: with format `YYYY`, with range 1901 to 2155;
   - `time`: with format `HHH:MI:SS`, with range -838:59:59 to 838:59:59.
     To enter a value in these types, you must provide a string in the specified format.
-    ![](/SQL/4.png)
+    ![](/Introduction-to-SQL/4.png)
 
-### Creating a table
+## Creating a table
 
 When creating a table, it is a good idea to note down:
 
@@ -132,7 +132,7 @@ When creating a table, it is a good idea to note down:
 
   In this step, you can add a column containing the primary key of the row, in most cases an unsigned integer. A table for storing data about people could be:
 
-  ![](/SQL/5.png)
+  ![](/Introduction-to-SQL/5.png)
 
 The MySQL command to create this table is therefore:
 
@@ -179,7 +179,7 @@ Where:
 - Fifth column `Default`: specifies whether the field has a default value, if none is provided;
 - Sixth column `Extra`: shows other information relevant to the column.
 
-### Populate and edit tables
+## Populate and edit tables
 
 Data is inserted using the `INSERT` statement. The statement requires the name of the table where the data is to be inserted, the names of the columns to be populated, and the values to be inserted.
 The values in the primary keys of a table can be generated:
@@ -250,4 +250,6 @@ Some errors that may occur when executing these commands are:
 - Violation of possible values: if you try to set an eye color that is not allowed, for example `ZZ`, MySQL returns: `ERROR 1265 (01000): Data truncated for column ‘eye_color’ at row 1`;
 - Date entered the wrong format: if the string containing the date is formatted incorrectly, MySQL will return: `ERROR 1292 (22007): Incorrect date value: ‘DEC-21-1980’ for column ‘birth_date’ at row 1`.
 
-## Query Primer
+# Query Primer
+
+WIP

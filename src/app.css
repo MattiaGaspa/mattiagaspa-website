@@ -39,7 +39,8 @@
 
 	h1,
 	h2,
-	h3 {
+	h3,
+	h4 {
 		@apply mb-5;
 		font-family: 'Noto Sans', sans-serif;
 		font-optical-sizing: auto;
@@ -76,6 +77,12 @@
 
 	h3 {
 		@apply mt-4 text-2xl font-medium;
+		font-weight: 600;
+		line-height: 1.25;
+	}
+
+	h4 {
+		@apply mt-4 text-xl font-medium;
 		font-weight: 600;
 		line-height: 1.25;
 	}

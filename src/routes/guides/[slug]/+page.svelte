@@ -20,7 +20,7 @@
 
 <article>
 	<hgroup>
-		<h1>{data.meta.title}</h1>
+		<h1 class="text-6xl">{data.meta.title}</h1>
 	</hgroup>
 
 	<data.content />
