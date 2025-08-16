@@ -17,13 +17,16 @@
 	<!-- Navigation bar -->
 	<div class="container mx-auto flex flex-row items-center justify-between rounded-4xl">
 		<!-- Main container -->
-		<div class="px-4 pt-2 text-left text-2xl sm:text-4xl lg:text-5xl xl:text-7xl transition duration-300 ease-in-out hover:scale-110 inline">
+		<div
+			class="inline px-4 pt-2 text-left text-2xl transition duration-300 ease-in-out hover:scale-110 sm:text-4xl lg:text-5xl xl:text-7xl"
+		>
 			<!-- Logo -->
-			<a href="/" class="heading-font flex items-center"
-			>$ Portfolio</a>
+			<a href="/" class="heading-font flex items-center">$ Portfolio</a>
 		</div>
 
-		<div class="flex-col items-center md:text-xl lg:text-2xl xl:text-4xl lg:mt-0 lg:flex lg:flex-row lg:space-x-4">
+		<div
+			class="flex-col items-center md:text-xl lg:mt-0 lg:flex lg:flex-row lg:space-x-4 lg:text-2xl xl:text-4xl"
+		>
 			<!-- Navigation links -->
 			<a
 				href="/"
