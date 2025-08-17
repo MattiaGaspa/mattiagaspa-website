@@ -34,7 +34,7 @@ Currently, for my personal projects, I'm using, and learning, various languages,
 
 When I'm not using a computer, I'm passionate about playing the trumpet. I currently own two trumpets:
 
-- _Yamaha YTR-3335_: bought in 2013 and it's my first trumpet;
+- _Yamaha YTR-3335_: bought in 2013, and it's my first trumpet;
 - _Getzen 490-LV_: bought on February 25th, 2023 and it's my current trumpet.
 
 > "He who desires but acts not, breeds pestilence."
