@@ -260,6 +260,7 @@ Unlike slices, passing an array as an argument to a function is equivalent to pa
 A slice is created from an array, but its length is not fixed. When the slice needs more space, it creates a new array and copies the elements from the old array to the new one.
 
 The declaration of a slice is:
+
 ```go
 var x = []int
 x := []int{}
@@ -268,6 +269,7 @@ x := []int{}
 You can get the length of a slice with the `len()` function.
 
 You can access the elements of a slice with the `[]` operator, just like an array. You can add elements to the slice with:
+
 ```go
 x = append(x, 1) // Add 1 at the end of the slice
 ```
@@ -283,6 +285,7 @@ Changing the values of the element `y[0]` will also change the value of `x[1]`. 
 The same goes when appending new elements.
 
 Slices, unlike arrays, are passed by reference when passed as argument to functions:
+
 ```go
 func doAppend(s1 []int) {
 	s1 = appen(s1, 100)
@@ -297,6 +300,7 @@ func main() {
 ```
 
 To iterate over the slice:
+
 ```go
 for index, val := range someSlice {
 	fmt.Printf("slice entry %d: %s\n", index, val)
@@ -304,6 +308,7 @@ for index, val := range someSlice {
 ```
 
 If the index is not needed, you can use `_` to discard it. If instead the value is not needed, you can write:
+
 ```go
 for index := range someSlice {
 	// ...
@@ -313,11 +318,13 @@ for index := range someSlice {
 ## Maps
 
 You can declare a map with the `make()` function:
+
 ```go
 var counters = make(map[string]int, 10)
 ```
 
 With this instruction you will create a map of 10 elements, that maps a `string` to an `int`. Another way to declare a map is:
+
 ```go
 models := map[string]string {
 	"prius": "toyota",
@@ -330,6 +337,7 @@ The values associated with the key are obtained using the same syntax as for arr
 If, on the other hand, a value is assigned to a non-existent key, the size of the map increases.
 
 All values within a map are extracted in the same way as slices:
+
 ```go
 for key, val := range models {
 	fmt.Printf("key: %q, value: %q\n", key, val)
@@ -339,6 +347,7 @@ for key, val := range models {
 ## Pointers
 
 In Go, you can obtain the memory address of a variable using the `&` operator. A variable's memory address can be stored in a pointer of the same type as the variable.
+
 ```go
 var x int
 var intPtr *int
@@ -350,6 +359,7 @@ To access the value pointed to by `intPtr`, use the dereference operator `*`. Th
 ## Struct
 
 It is a collection of variables. You can declare a struct in two ways: the first one (and less used) is:
+
 ```go
 var record = struct {
 	Name string
@@ -361,6 +371,7 @@ var record = struct {
 ```
 
 The second one uses the keyword `type` to create a new type based on the struct:
+
 ```go
 type Record struct {
 	Name string
@@ -378,13 +389,15 @@ func main() {
 You can access the fields of a struct with the `.` operator, as in `record.Name` or `record.Age`.
 
 You can also create methods for structs. The syntax is:
+
 ```go
 func (r Record) String() string {
     return fmt.Sprintf("Name: %s, Age: %d", r.Name, r.Age)
 }
 ```
 
-It should be noted that a struct is not a *reference type*: changing the value of a struct within a function will not change the value of the struct outside the function. To do this, a pointer is required. To create a function that increments age:
+It should be noted that a struct is not a _reference type_: changing the value of a struct within a function will not change the value of the struct outside the function. To do this, a pointer is required. To create a function that increments age:
+
 ```go
 func (r *Record) IncrAge() {
 	r.Age++
@@ -393,9 +406,10 @@ func (r *Record) IncrAge() {
 
 It is good practice to have all methods of the struct accept either only pointers or only non-pointers.
 
-*Constructors* are special functions that initialize the struct. Go does not provide anything special, so you need to use a *constructor pattern*.
+_Constructors_ are special functions that initialize the struct. Go does not provide anything special, so you need to use a _constructor pattern_.
 
 Often constructors are called `New<TypeName>()`, where `<TypeName>` is the name of the struct, or `New()` if there aren't other types within the package.
+
 ```go
 func NewRecord(name string, age int) (*Record, error) {
 	if name == "" {
@@ -411,6 +425,7 @@ func NewRecord(name string, age int) (*Record, error) {
 ## Interfaces
 
 An interface is a collection of methods that a type must implement to be considered as implementing that interface. An interface is declared with the `type` keyword, followed by the name of the interface and the methods it contains:
+
 ```go
 type Stringer interface {
     String() string
@@ -422,6 +437,7 @@ All types that implement the `Stringer` interface (defined in the `fmt` library)
 It should be noted that when a type is saved in an interface, it is no longer possible to access its members or functions that do not belong to the interface.
 
 A blank interface is an interface that has no methods. It is an interface that can contain any variable. It is used by the fmt.Println() and fmt.Printf() methods to print objects:
+
 ```go
 func Println(a ...interface{}) (n int, err error)
 func Printf(format string, a ...interface{}) (n int, err error)
@@ -431,7 +447,8 @@ It is therefore an excellent method for passing values but not for using them.
 
 ### Type assertion
 
-We talk about *type assertion* when it is possible to change an `interface{}` value into a value that we can use. There are two methods:
+We talk about _type assertion_ when it is possible to change an `interface{}` value into a value that we can use. There are two methods:
+
 - `if`: where `i.(string)` checks that `i` is a string. If `ok == true`, then `v` will be a string;
   ```go
   if v, ok := i.(string); ok {
@@ -450,10 +467,199 @@ We talk about *type assertion* when it is possible to change an `interface{}` va
   case Person, *Person:
       fmt.Printf("%v", i)
   default:
-      fmt.Printf("%T", i) // %T stampa come è fatto il tipo di i
+      fmt.Printf("%T", i) // %T print as is the type of i
   }
   ```
-  
+
 # Go Essentials
 
+## Error handling
+
+Go, unlike other programming languages, handles errors with the `error` interface:
+
+```go
+type error interface {
+    Error() string
+}
+```
+
+The most common way to create a new type of error is:
+
+```go
+err := errors.New("this is an error")
+err := fmt.Errorf("user %s had an error: %s", user, msg)
+```
+
+You can also save errors in variables, so that you can check them later:
+
+```go
+var ErrNetwork := errors.New("network error")
+
+for { // Keep trying
+	err := someFunc("data")
+	if err == nil {
+		break // Success
+	}
+	if errors.Is(err, ErrNetwork) {
+		log.Println("recoverable network error")
+		time.Sleep(1 * time.Second)
+		continue
+	}
+	log.Println("unrecovetabe error")
+	break
+}
+```
+
+When you receive an error from a lower-level package, you can wrap it so that an upper-level package can handle it without losing information. The wrapping is done with the `fmt.Errorf()` function:
+
+```go
+func restCall(data) error {
+    if err := someFunc(data); err != nil {
+        return fmt.Errorf("restCall(%s) had an error: %w", data, err)
+    }
+    return nil
+}
+```
+
+The handling is done with the `As()` function:
+
+```go
+for {
+    if err := restCall(data); err != nil {
+        var netErr ErrNetwork
+        if errors.As(err, &netErr) {
+            log.Println("network error: ", err)
+            time.Sleep(1 * time.Second)
+            continue
+        }
+    log.Println("unrecoverable: ", err)
+    }
+}
+```
+
+The `As()` function will check if the received error is of the type `ErrNetwork` and, if so, will save it in the variable netErr. This snippet will work no matter how many times the error is wrapped.
+
+## Constants
+
+A constant is a value that cannot be changed during the execution of the program. It is declared with the syntax:
+
+```go
+const name = value
+```
+
+Constants can also be declared:
+
+- Without a type: when writing `const var = 10`, we can use the constant `var` with every type that is numeric;
+- With a type: when writing `const var int64 = 10`, we can use the constant `var` only with variables of type `int64`.
+
+### Enumerations
+
+It is possible to generate an enumeration with the keyword `iota`:
+
+```go
+const (
+	a = iota // 0
+	b = iota // 1
+	c = iota // 2
+)
+
+const (
+	a = iota * 2 // 0
+	b            // 2
+	c            // 4
+)
+```
+
+To display the numbered type, you could associate a string, but that would not be efficient. Therefore, Go's _[code generation](https://blog.golang.org/generate)_ concept is used.
+
+## `defer`, `panic` and `recover`
+
+The keyword `defer` is used when you want to execute a function immediately after exiting the current scope. It is common to use it for debugging, freeing mutex, etc.:
+
+```go
+func printStuff() (value string) {
+	defer fmt.Println("exiting")
+	defer func() {
+		value = "we returned this"
+	}()
+	fmt.Println("I am printing stuff")
+	return ""
+}
+
+func main() {
+	v := printStuff()
+	fmt.Println(v)
+}
+```
+
+The output will be:
+
+```
+I am printing stuff
+exiting
+we returned this
+```
+
+The `panic` keyword is used to immediately terminate the program execution. It must be used only within the `main()` function.
+
+The keyword `recover` is rarely used, it is needed to recover the program from a `panic`:
+
+```go
+func someFunc() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("called recover, panic was: %q", r)
+		}
+	}()
+	panic("oh no!!!")
+}
+```
+
+## Goroutines
+
+Go has implemented a _runtime scheduler_ that maps all goroutines to operating system threads and decides when to switch routines to optimize execution.
+
+Given a function `func()`, you can run it concurrently by adding the keyword `go` before the function name.
+
+### Synchronization
+
+When dealing with concurrent functions, it is important to note that a variable can be read by many at the same time, but written by only one. Go has a [_race detector_](https://golang.org/doc/articles/race_detector) to detect when a variable is read and written simultaneously.
+
+The most commonly used methods for synchronization in Go are:
+
+- The `channel` type: to exchange data between goroutines;
+- `Mutex` and `RwMutex`: from the `sync` package, to lock a variable so that only one goroutine can access it at a time;
+- `WaitGroup`: from the `sync` package, to wait for a group of goroutines to finish before continuing.
+
+#### `WaitGroup`
+
+A `WaitGroup` is a counter that only has positive values indicating the number of tasks that have not yet been completed. The methods are:
+
+- `.Add(int)`: to add a number of tasks to the counter;
+- `.Done()`: to decrement the counter by one;
+- `.Wait()`: to wait for the counter to reach zero.
+
+An example of usage is:
+
+```go
+func main() {
+	wg := sync.WaitGroup()
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func(n int) {
+			defer wg.Done()
+			fmt.Println(n)
+		}(i)
+	}
+	wg.Wait()
+	fmt.Println("All work done")
+}
+```
+
+It is important that the counter is not incremented with `.Add(int)` within the concurrent function. If the counter is passed to a function, remember that a reference must be passed, otherwise the function will operate on a copy of the counter.
+
+#### Channels
+
 WIP
+
+#### Mutex
