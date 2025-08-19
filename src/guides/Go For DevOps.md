@@ -660,6 +660,496 @@ It is important that the counter is not incremented with `.Add(int)` within the 
 
 #### Channels
 
-WIP
+A channel enables communication between two goroutines: one goroutine inserts data while another goroutine extracts it. The channel can be:
+
+- _Buffered_: if it can hold a certain amount of data before blocking the goroutine that produces it;
+- _Unbuffered_: if the two goroutines need to have a _rendezvous_ to communicate the data.
+
+Channels are created with the `make()` function:
+
+```go
+ch := make(chan string, 1) // Buffered with one element
+ch := make(chan string) // Unbuffered
+```
+
+Data is sent and received from a channel using the `<-` operator:
+
+```go
+ch <- variable // Send data to the channel
+variable := <-ch // Receive data from the channel
+```
+
+Data can be extracted from a channel in a `for` loop:
+
+```go
+for val := range ch {
+	fmt.Println(val)
+}
+```
+
+A channel, when no longer needed, must be closed with the `close(ch)` function. This operation must be done from the writer side.
+
+To listen from more than one channel, you can use the `select` statement:
+
+```go
+select {
+case s := <-inCh1:
+	go fmt.Println("received(inCh1): ", v)
+case s := <-inCh2:
+	go fmt.Println("received(inCh2): ", v)
+default:
+	fmt.Println("No data in channels")
+}
+```
+
+The most common use of channels is to send signals to goroutines.
 
 #### Mutex
+
+It is a primitive used to block access to a resource to only one goroutine. If you try to gain access when the mutex is already locked, the goroutine will be blocked until the mutex is released.
+
+The functions of a `sync.Mutex` are:
+
+- `.Lock()`: to lock the mutex;
+- `.Unlock()`: to unlock the mutex.
+
+The `sync.RWMutex` allows you to provide a read lock and a write lock. The functions are:
+
+- `.RLock()`: to lock the mutex for reading;
+- `.Lock()`: to lock the mutex for writing. This function will wait until all read locks are released;
+- `.RUnlock()` and `.Unlock()`: to unlock the mutex;
+
+Generally `sync.Mutex` is faster.
+
+## `Context` type
+
+It's a package that is used when:
+
+- You want to cancel a set of functions after a certain event occurs;
+- You want to pass information through a series of function calls.
+
+The `Context` object is created either in `main()` or when an RPC or HTTP request needs to be executed. It is created with:
+
+```go
+import "context"
+
+func main() {
+    ctx := context.Background() // Create a new context
+}
+```
+
+### Timeout signal
+
+The `contect` object is often used to send a timeout signal to a goroutine. Given a function `GatherData()` that is to be terminated after 5 seconds have passed, write:
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+data, err := GatherData(ctx, args)
+cancel()
+if err != null {
+	return err
+}
+```
+
+The code:
+
+1. With `context.WithTimeout()` creates a new context that will be canceled after 5 seconds;
+2. Calls the `GatherData()` function, passing the context as an argument;
+3. If the context still exists after the function has finished, because it took less than 5 seconds, then `cancel()` deletes the context.
+
+Each context must derive from another context; in the example, it derives from `context.Background()`. Deleting a context, either directly or automatically after a period of time, results in the deletion of all children of that context.
+
+The `GatherData()` function must honor the context. The implementation of the function could be:
+
+```go
+func GatherData(ctx context.Context, args Args) ([]file, error) {
+	if ctx.Err() != nil {
+		return nil, err
+	}
+	localCtx, localCancel := context.WithTimeout(ctx, 2 * time.Second)
+	local, err := getFilesLocl(localCtx, args.local)
+	localCancel()
+	if err != nil {
+		return nil, err
+	}
+
+	remoteCtx, remoteCancel := context.WithTimeout(ctx, 3 * time.Second)
+	remote, err := getFilesRemote(remoteCtx, args.remote)
+	remoteCancel()
+	if err != nil {
+		return nil, err
+	}
+	return append(local, remote), nil
+}
+```
+
+`Context` also supports a `.Done()` method to check whether a deletion has been requested within a `select`:
+
+```go
+select {
+case <-ctx.Done():
+	return ctx.Err()
+case data := <-ch:
+	return data, nil
+}
+```
+
+### Pass values
+
+The best uses for `Context` to pass data are:
+
+- Security information about the user making the call: in this case, the system is informed about who the user is, probably with an OpenID Connect (OIDC);
+- Telemetry information: allows the service to record information related to execution times, database latency, etc.
+
+The values passed to `Context` are in key/value form:
+
+```go
+type key int
+const claimsKey key = 0
+func NewContext(ctx context.Context, claims Claims) context.Context {
+	return context.WithValue(ctx, claimsKey, claims)
+}
+
+func ClaimsFromContext(ctx context.Context) (Claims, bool) {
+	claims, ok := ctx.Value(userIPKey).(Claims)
+	return claims, ok
+}
+```
+
+The code:
+
+- Defines a private type `key`;
+- Defines the constant `claimsKey` of type `key`;
+- `NewContext()` attaches a `Claim` to the `Context`;
+- `ClaimsFromContext()` provides a function that extracts `Claims` from the `Context` (if present, otherwise it returns `nil`).
+
+## Testing
+
+In Go, test files are contained in a file with the suffix `_test.go`. These files have the same package, and usually, for each `.go` file, the respective `_test.go` is written.
+
+Each function within these files begins with the prefix `Test` and has a single argument `t *testing.T`:
+
+```go
+func TestFuncName(t *testing.T) {
+}
+```
+
+The value `t` is passed by the `go test` command and provides methods for running tests, including:
+
+- `t.Error()`
+- `t.Errorf()`
+- `t.Fatalf()`
+- `t.Log()`
+- `t.Logf()`
+
+Tests are considered passed if they do not end with a `panic`/`Error`/`Errorf`/`Fatal`/`Fatalf`. If an `Error`/`Errorf` is called, the tests continue even if one or more have failed. With `Fatal`/`Fatalf`, however, the tests end immediately. `Log`/`Logf` are used to display information.
+
+An example of a test file is:
+
+```go
+package greetings
+
+import "testing"
+
+func TestGreet(t *testing.Testing) {
+	name := "Bob"
+	want := "Hello Bob"
+	got, err := Greet(name)
+	if got != want || err != nil {
+		f.Fatalf("TestGreet(%s: got %q/%v, want %q/nil", name, got, err, want))
+	}
+}
+```
+
+### _Table Driven Tests_ (TDT)
+
+This is a practice where you test not only whether the function works correctly, but also the various types of failures it may encounter. The previous test becomes:
+
+```go
+func TestGree(t *testing.T) {
+	tests := []struct{
+		desc string
+		name string
+		want string
+		expectErr bool
+	} {
+		{
+			desc: "Error: name is an empty string",
+			expectErr: true
+		},
+		{
+			desc: "Success"
+			name: "John"
+			want: "Hello John"
+		},
+	}
+	for _, test := range tests {
+		got, err := Greet(test.name)
+		switch {
+		case err == nil && test.expectErr:
+			t.Errorf("TestGreet(%s): got err == nil, want err != nil", test.desc)
+			continue
+		case err != nil && !test.expectErr:
+			t.Errorf("TestGreet(%s): got err == %s, want err == nil", test.desc, err)
+			continue
+		case err != nil:
+			continue
+		}
+		if got != test.want {
+			t.Errorf("TestGreet(%s): got result %q, want %q", test.desc, got, test.want)
+		}
+	}
+}
+```
+
+To test the components of a REST application, you do not contact the service directly but use _fakes_ with interfaces.
+
+Assuming that the client executes:
+
+```go
+type Fetch struct {
+	// Internals
+}
+
+func (f *Fetch) Record(name string) (Record, error) {
+	// Code to interact with the server
+}
+```
+
+The test with fakes is performed as follows. Modify the `Greeter` code with:
+
+```go
+type recorder interface {
+	Record(name string) (Record, error)
+}
+
+func Greeter(name string, fetch recorder) (string, error) {}
+```
+
+And then the fakes are added:
+
+```go
+type fakeRecorder struct {
+	data Record
+	err bool
+}
+func (f fakeRecorder) Record(name string) (Record, error) {
+	if f.err {
+		return "", errors.New("error")
+	}
+	return f.data, nil
+}
+```
+
+The testing function becomes:
+
+```go
+
+func TestGreeter(t *testing.T) {
+	tests := []struct {
+		desc      string
+		name      string
+		recorder  recorder
+		want      string
+		expectErr bool
+	}{
+		{
+			desc:      "Error: recorder had some server error",
+			name:      "John",
+			recorder:  fakeRecorder{err: true},
+			expectErr: true,
+		},
+		{
+			desc: "Error: server returned wrong name",
+			name: "John",
+			recorder: fakeRecorder{
+				rec: Record{Name: "Bob", Age: 20},
+			},
+			expectErr: true,
+		},
+		{
+			desc: "Success",
+			name: "John",
+			recorder: fakeRecorder{
+				rec: Record{Name: "John", Age: 20},
+			},
+			want: "Greetings John",
+		},
+	}
+
+	for _, test := range tests {
+		got, err := Greeter(test.name, test.recorder)
+		switch {
+		case err == nil && test.expectErr:
+			t.Errorf("TestGreet(%s): got err == nil, want err != nil", test.desc)
+			continue
+		case err != nil && !test.expectErr:
+			t.Errorf("TestGreet(%s): got err == %s, want err == nil", test.desc, err)
+			continue
+		case err != nil:
+			continue
+		}
+		if got != test.want {
+			t.Errorf("TestGreet(%s): got result %q, want %q", test.desc, got, test.want)
+		}
+	}
+}
+```
+
+In this way, `Greeter` takes a `recorder` interface as an argument:
+
+- When we call `Greeter` in the program, we will pass the actual client;
+- When we call `Greeter` in the tests, we simulate the client with `fakeRecorder`.
+
+### Packages for testing
+
+A very useful package for testing is [`pretty`](https://pkg.go.dev/github.com/kylelemons/godebug/pretty):
+
+```go
+if diff := pretty.Compare(want, got); diff != "" {
+	t.Errorf("TestSomeFunc(%s): -want/+got:\n%s", diff)
+}
+```
+
+Another set of packages is provided by [`testify`](https://github.com/stretchr/testify), which includes the `assert` and `mock` packages.
+
+## Generics
+
+They were introduced with Go 1.18 and allow multiple types to be represented with a `type` _parameter_.
+
+Type parameters are added in square brackets after the function name:
+
+```go
+func sortInts[I int8 |int16 |int32 |int64](slice []I) { }
+```
+
+This function accepts a slice as a parameter, which can be given by `int8`, `int16`, `int32`, or `int64`.
+
+To reduce the amount of code to be written, it can also be implemented as:
+
+```go
+type SignedInt interface {
+	int8 |int16 |int32 |int64
+}
+func sortInts[I SignedInt](slice []I) { }
+```
+
+It is not possible to implement functions with types created by us. In order to say that our function also accepts types based on integers, we must use `~`:
+
+```go
+type SignedInt interface {
+	~int8 |~int16 |~int32 |~int64
+}
+```
+
+### Constraints
+
+Note that our `sortInts` function requires that the `>` operator works between the two generics. We could therefore use the [_constraints_](https://pkg.go.dev/golang.org/x/exp/constraints) package. The constraint on the sorted values is defined as:
+
+```go
+type Ordered interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
+	~uintptr |
+	~float32 | ~float64 |
+	~string
+}
+```
+
+And it would be used as:
+
+```go
+func sortSlice[O constraints.Ordered](slice []O) {
+```
+
+The constraints that are built into Go are:
+
+- `comparable`: which contains all types that support the operators `==` or `!=`;
+- `any`: which is an alias for `interface{}` and can contain any type.
+
+It should be noted that constraints can behave like an interface that requires values as well as methods. For example:
+
+```go
+type StringPrinter interface {
+	~string // ~ is used because string would not have the Print method
+	Print()
+}
+```
+
+To use Go's `sort.Sort()` function, the user-defined type must implement the `sort.Interface` interface. Whereas previously it was necessary to manually implement the interface methods (`Len()`, `Less()`, and `Swap()`) for each type, now with generics you can write:
+
+```go
+type sortableSlice[T any] struct {
+	slice []T
+	less func(T, T) bool // function that implements the operator<
+}
+
+func (s sortableSlice[T]) Len() int {
+	return len(s.slice)
+}
+
+func (s sortableSlice[T]) Swap(i, j int) {
+	s.slice[i], s.slice[j] = s.slice[j], s.slice[i]
+}
+
+func (s sortableSlice[T]) Less(i, j int) bool {
+	return s.less(s.slice[i], s.slice[j])
+}
+```
+
+# Set up the environment
+
+## Creating the working directory
+
+Once the working directory has been created, run the command:
+
+```bash
+go mod init example.com/hello
+```
+
+A `go.mod` file will be created:
+
+```go
+module example.com/hello
+go 1.17
+```
+
+Where:
+
+- The first line is the name of the module;
+- The second line is the minimum version of Go required to run the module.
+
+When adding dependencies to our project that are not present in the standard library, we must also add them to the `go.mod` file. To do this, we use the command:
+
+```bash
+go mod tidy
+```
+
+Write the file `hello.go`:
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Hello world")
+}
+```
+
+You execute the program with:
+
+```bash
+go run hello.go
+```
+
+You compile the program, and then execute, with:
+
+```bash
+go build hello.go
+./hello
+```
+
+# Filesystem interactions
+
+WIP
