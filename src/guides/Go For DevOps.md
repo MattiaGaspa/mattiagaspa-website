@@ -1152,4 +1152,452 @@ go build hello.go
 
 # Filesystem interactions
 
+Go provides a file-based I/O system. The package that provides the primitives for working with files, disks, and the internet is the `io` package.
+
+The data flow is managed with a stream of bytes. The interfaces for basic operations are:
+
+```go
+type Reader interface { // Read from an I/O stream
+	Read(p []byte) (n int, err error)
+}
+type Writer interface { // Write from an I/O stream
+	Write(p []byte) (n int , err error)
+}
+type Seeker interface { // Position in the I/O stream
+	Seek(offset int64, whence int) (int64, error)
+}
+type Closer interface { // Close the I/O stream
+	Close() error
+}
+```
+
+## Read and write files
+
+Read the contents of the file with:
+
+```go
+data, err := os.ReadFile("path/to/file")
+```
+
+Internally the `ReadFile()` function:
+
+1. Read the position of the files and verify that it has access to it;
+2. An internal call to `os.Open()` is made to open the file, and an `io.Reader` is returned;
+3. A call to the function `io.ReadAll()` is made to reade all data from the file.
+
+The type of `data` is `[]byte`, to convert it to a string simply use `string(data)`.
+
+Writing is performed using the `os.WriteFile()` function:
+
+```go
+if err := os.WriteFile("path/to/file", data, 0644); err != nil {
+	return err
+}
+```
+
+The type of `data` must be `[]byte`, so if `data` is a string, you must first write `[]byte(data)`.
+
+### Remote files
+
+If a file is saved in an HTTP server the code is:
+
+```go
+client := &http.Client{} // Client creation
+// Generation of the request
+req, err := http.NewRequest("GET", "http://myserver.mydomain/myfile", nil)
+if err != nil {
+	return err
+}
+req = req.WithContext(ctx) // A context is associated
+
+resp, err := client.Do(req) // The request is sent
+cancel()
+if err != nil {
+	return err
+}
+data, err := io.ReadAll(resp.Body) // The content of the file is in resp.Body
+```
+
+To save the content with `os.OpenFile()` the code is:
+
+```go
+flags := os.O_CREATE|os.O_WRONLY|os.O_TRUNC
+f, err := os.OpenFile("path/to/file", flags, 0644)
+if err != nil {
+	return err
+}
+defer f.Close()
+
+if err := io.Copy(f, resp.Body); err != nil {
+	return err
+}
+```
+
+If you want to set [flags](https://pkg.go.dev/os#pkg-constants) other than those used by `WriteFile`, you must do so. The flags used specify:
+
+- `O_CREATE`: if the file does not exist, it will be created;
+- `O_WRONLY`: in order to write to the file;
+- `O_TRUNC`: if the file exists, it is truncated instead of appending the content that is about to be written.
+
+## Streaming the file content
+
+When dealing with very large files, it is preferable to read them in chunks rather than loading them all into memory.
+
+To read a stream of user records, saved in the format `<user>:<id>`, the code is:
+
+```go
+type User struct {
+	Name string
+	ID int
+}
+
+func getUser(s string) (User, error) {
+	sp := strings.Split(s, ":") // Split the string
+	if len(sp) != 2 { // Assert that there are two elements (name and ID)
+		return User{}, fmt.Errorf("record(%s) was not in the correct format", s)
+	}
+	id, err := strconv.Atoi(sp[i]) // Convert the ID to an integer
+	if err != nil {
+		return User{}, fmt.Errorf("record(%s) had non-numeric ID", s)
+	}
+	return User{Name: strings.TrimSpace(sp[0]), ID: id}, nil // Return an User object
+}
+
+func decodeUsers(ctx context.Context, r io.Reader) chan User {
+	ch := make(chan User, 1)
+	go func() {
+		defer close(ch) // Close the channel when done
+		scanner := bufio.NewScanner(r) // Create a scanner to read the stream
+		for scanner.Scan() { // If there is a line to read, read it
+			if cts.Err() != nil { // Error check
+				ch <- User{err: ctx.Err()}
+				return
+			}
+			// Get an User object by passing scanner.Text() to getUser()
+			u, err := getUser(scanner.Text())
+			if err != nil {
+				u.err = err
+				ch <- u
+				return
+			}
+			ch <- u // Send the User object to the channel
+		}
+	}()
+	return ch
+}
+```
+
+Writing to a stream is simpler:
+
+```go
+func writeUser(ctx context.Context, w io.Writer, u User) error {
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	if _, err := w.Write([]byte(user.String())); err != nil {
+		return err
+	}
+	return nil
+}	
+```
+
+## File path
+
+Since Go must be executable on multiple operating systems, and since each operating system has its own way of marking file paths, a single method must be used to determine the location of the file.
+
+You can obtain the current working directory with:
+
+```go
+wd, err := os.Getwd()
+```
+
+You can add elements to the path with the `Join()` function from the `path/filepath` package:
+
+```go
+newPath := filepath.Join(wd, "directory", "file.txt")
+```
+
+Other functions in the `path/filepath` package are:
+
+- `Base()`: to return the last element of the path;
+- `Ext()`: to return the file extension, if any;
+- `Split()`: to separate the directory from the file;
+- `Abs()`: returns the absolute path. If it is not an absolute path, it returns the working directory;
+- `Rel()`: returns the path relative to a base.
+
+## OS-independent access to the file system
+
+Starting with Go 1.16, the `io/fs` and `embed` packages are available.
+
+### `io.fs`
+
+Through the `FS` interface implemented by the filesystem:
+
+```go
+type FS interface {
+	Open(name string) (File, error)
+}
+```
+It is possible to access a file:
+
+```go
+type File interface {
+	Stat() (FileInfo, error)
+	Read([]byte) (int, error)
+	Close() error
+}
+```
+
+It is not possible to write to the file, only to read it.
+
+### `embed`
+
+This package allows you to integrate files directly into the binary. There are three ways to include files:
+
+- As bytes;
+- As a string;
+- As `embed.FS` (that implements the `FS` interface).
+
+The first two methods are implemented as follows:
+
+```go
+import _ "embed"
+
+//go:embed hello.txt
+var s string
+//go:embed world.txt
+var b []byte
+```
+
+The line `//go:embed hello.txt` is a Go directive telling the compiler to take the file named `hello.txt` and put it into the variable `s`.
+
+The `embed.FS` method is used when you want to include multiple files in the binary:
+
+```go
+//go:embed image/*
+//go:embed index.html
+var content embed.FS
+```
+
+To print all `*.jpg` files in the `image` directory, you can write:
+
+```go
+err := fs.WalkDire(
+	content,
+	".",
+	func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() && filepath.Ext(path) == ".jpg" {
+			fmt.Println("jpeg file: ", path)
+		}
+	}
+)
+```
+
+# Common data formats
+
+## CSV
+
+CSV stands for *Comma Separated Values* and is one of the most common file formats for saving data. Data in a CSV file can be accessed using the `strings` or `bytes` package or the `encoding/csv` package.
+
+### `strings`
+
+The most important features of this package are:
+
+- `Split()`: to separate data by specifying a separator;
+- `Join()`: to join data;
+- `bytes.Buffer` and `strings.Builder`: to implement the interfaces of the `io` package.
+
+Working with strings is convenient, but sometimes converting from `[]bytes` to `string` can be slow. In this case, it is better to use the `bytes` and `bufio` packages.
+
+If the file is small, conversion from `.csv` to `[]record` can be done with:
+
+```go
+type record []string
+func (r record) validate() error {
+	if len(r) != 2 {
+		return errors.New("data format is incorrect")
+	}
+	return nil
+}
+func (r record) first() string {
+	return r[0]
+}
+func (r record) last() string {
+	return r[1]
+}
+
+func readRecs() ([]record, error) {
+	b, err := os.ReadFile("data.csv")
+	if err != nil {
+		return nil, err
+	}
+	content := string(b)
+	lines := strings.Split(content, "\n")
+	var records []record
+	for i, line := range lines {
+		if strings.Trimspace(line) == "" {
+			continue
+		}
+		var rec record = strings.Split(line, ",")
+		if err := rec.validate(); err != nil {
+			return nil, fmt.Errorf("entry at line %d was invalid: %w", i, err)
+		}
+		records = append(records, rec)
+	}
+	return records, nil
+}
+```
+
+If, on the other hand, the file is large, it is better to convert it line by line:
+
+```go
+func readRecs() ([]record, error) {
+	file, err := os.Open("data.csv")
+	if err != nil {
+		return nul, err
+	}
+	defer file.Close()
+	
+	scanner := bufio.NewScanner(file)
+	var records []record
+	lineNum := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		var rec record = strings.Split(line, ",")
+		if err := rec.validate(); err != nil {
+			return nul, fmt.Errorf("entry at line %d was invalid: %w", lineNum, err)
+		}
+		records = append(records, rec)
+		lineNum++
+	}
+	return records, nil
+}
+```
+
+Writing is done with:
+
+```go
+func writeRecs(recs []record) error {
+	file, err := os.OpenFile("data-sorted.csv", os.O_CREATE|os.O_TRUNC|os.OWRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	
+	defer file.Close()
+	
+	sort.Slice(
+		recs,
+		func(i, j int) bool {
+			return recs[i].last() < recs[j].last()
+		},
+	)
+	
+	for _, rec := range recs {
+		_, err := file.Write(rec.csv())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+```
+
+### `encoding/csv`
+
+It is preferable to use this package when the file complies with the RFC 4180 standard.
+
+#### Reading
+
+Reading is performed using the `Reader` type provided by the package:
+
+```go
+func readRecs() ([]record, error) {
+	file, err := os.Open("data.csv")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	
+	reader := csv.NewReader(file) // Pass the file to the constructor
+	reader.FieldPerRecord = 2 // Every record must have two fields
+	reader.TrimLeadingSpace = true // Remove leading spaces
+	
+	var recs []record
+	for {
+		data, err := reader.Read()
+		if err != nil {
+			if err == io.EOF { // End Of File
+				break
+			}
+			return nil, err
+		}
+		rec := record(data)
+		recs := append(recs, rec)
+	}
+	return recs, nil
+}
+```
+
+#### Writing
+
+Writing is performed using the `Writer` type provided by the package:
+
+```go
+w := csv.NewWriter(file) // Pass the file to the constructor
+defer w.Flush() // Flush the buffer to the file at the end
+
+for _, rec := range recs {
+	if err := w.Write(rec); err != nil { // Write the record
+		return err
+	}
+}
+return nil
+```
+
+## Excel `excelize`
+
+Microsoft Excel is the best available database. To create and add data to an Excel spreadsheet with `excelise`, the code is:
+
+```go
+func main() {
+	const sheet = "Sheet1"
+	xlsx := excelise.NewFile() // Create a new Excel file
+	
+	// First row
+	xlsx.SetCellValue(sheet, "A1", "Server Name")
+	xlsx.SetCellValue(sheet, "B1", "Generation")
+	xlsx.SetCellValue(sheet, "C1", "Acquisition Date")
+	xlsx.SetCellValue(sheet, "D1", "CPU Vendor")
+	
+	// Second row
+	xlsx.SetCellValue(sheet, "A2", "svlaa01")
+	xlsx.SetCellValue(sheet, "B2", 12)
+	xlsx.SetCellValue(sheet, "C2", mustParse("10/27/2021"))
+	xlsx.SetCellValue(sheet, "D2", "Intel")
+	
+	// Third row
+	xlsx.SetCellValue(sheet, "A3", "svlac14")
+	xlsx.SetCellValue(sheet, "B3", 13)
+	xlsx.SetCellValue(sheet, "C3", mustParse("12/13/2021"))
+	xlsx.SetCellValue(sheet, "D3", "AMD")
+	
+	if err := xlsx.SaveAs("./Book1.xlsx"); err != nil {
+		panic(err)
+	}
+}
+```
+
+## Encoding formats
+
 WIP
+
+### JSON
+
+### YAML
+
