@@ -1867,14 +1867,276 @@ The package for interacting with SQL databases is in the standard library and is
 
 ### Connection
 
-WIP
+As mentioned earlier, you must use a driver to access Postgres: `github.com/jackc/pgx`.
+
+The connection to the standard library is made with an anonymous import of  `_ “github.com/jackc/pgx/v4/stdlib”`:
+
+```go
+dbURL := "postgres://username:password@localhost:5432/database_name"
+conn, err := sql.Open("pgx", dbURL) // Initialize the connection
+if err != nil {
+	return fmt.Errorf("connect to db error: %s\n", err)
+}
+defer conn.Close()
+
+ctx, cancel := context.WithTimeout( // Generate a context with timeout
+	context.Background(),
+	2 * time.Second()
+)
+
+if err := conn.PingContext(ctx); err != nil { // Ping the server
+	return err
+}
+cancel()
+```
+
+To use the types provided by the `pgx` package, you need to import `“github.com/jackc/pgx/v4/pgxpool”`:
+
+```go
+conn, err := pgxpool.Connect(ctx, dbURL) // More efficient connection
+if err != nil {
+	return fmt.Errorf("connect to db error: %s\n", err)
+}
+defer conn.Close(ctx)
+```
 
 ### Query
 
+With the standard library, the code is:
+
+```go
+type UserRec struct { // Data saved in the database
+	User string
+	DisplayName string
+	ID int
+}
+
+func GetUser(ctx context.Context, conn *sql.DB, id int) (UserRec, error) {
+	const query = `SELECT "User", "DisplayName" FROM users WHERE "ID" = $1`
+	u := UserRec{ID: id}
+	err := conn.QueryRowContext(ctx, query, id).Scan(&u)
+	return u, err
+}
+```
+
+You can improve efficiency by creating an object that contains the database and the instruction to be executed:
+
+```go
+type Storage struct {
+	conn *sql.DB // Connection to the database
+	getUserStmt *sql.Stmt // Prepared statement
+	// Every prepared statement will have its own *sql.Stmt field
+	// usersBetweenStmt *sql.Stmt
+}
+
+func NewStorage(ctx context.Context, conn *sql.DB) *Storage {
+	return &Storage{
+		getUserStmt: conn.PrepareContext( // Prepare the statement
+			ctx,
+			`SELECT "User","DisplayName" FROM users WHERE "ID"=$1`,
+			// `SELECT "User","DisplayName" FROM users WHERE "ID" >= $1 AND "ID" <= $2`
+		)
+	}
+}
+
+func (s *Storage) GetUser(ctx context.Context, id int) (UserRec, error) {
+	u := UserRec{ID: id}
+	err := s.getUserStmt.QueryRow(id).Scan(&u) // Use the prepared statement
+	return u, err
+}
+```
+
+Note that this feature does not depend on the driver used, so it can also be used with other types of servers.
+
+If, on the other hand, you want to use the methods provided by `pgx`, the code becomes:
+
+```go
+err = conn.QueryRow(ctx, query).Scan(&u)
+return u, err
+```
+
+If the query returns more than one result, for example: `SELECT * FROM users`, to see all the results you must use:
+
+```go
+func (s *Storage) UsersBetween(ctx context.Context, start, end int) ([]UserRec, error) {
+	recs := []UserRec{}
+	rows, err := s.usersBetweenStmt.QueryContext(ctx, start, end)
+	defer rows.Close()
+	
+	for rows.Next() {
+		rec := UserRec{}
+		if err := rows.Scan(&rec); err != nil {
+			return nil, err
+		}
+		recs = append(recs, rec)
+	}
+	return recs, nil
+}
+```
+
+Since SQL allows columns to take on a null value, while Go initializes everything to zero, the `database/sql` package provides:
+
+- `sql.NullBool`;
+- `sql.NullByte`;
+- `sql.NullFloat64`;
+- `sql.NullInt16`;
+- `sql.NullInt32`;
+- `sql.NullInt64`;
+- `sql.NullString`;
+- `sql.NullTime`.
+
+For example, if you save the result of a query in a string and this string can take on a null value, then it is better for the variable to be an `sql.NullString`.
+
 ### Write
+
+The operations that can be performed are:
+
+- Update an existing entry;
+- Add a new entry.
+
+There is no command “update the entry if it exists, otherwise insert it.”
+
+The function to call to perform an update or insertion is always `ExecContext()`, and only the SQL syntax changes:
+
+```go
+func (s *Storage) AddUser(ctx context.Context, u UserRec) error {
+	_, err := s.addUserStmt.ExecContext(
+		ctx,
+		u.User,
+		u.DisplayName,
+		u.ID,
+	)
+	return err
+}
+
+func (s *Storage) UpdateDisplayName(ctx context.Context, id int, name string) error {
+	_, err := s.updateDisplayName.ExecContext(
+		ctx,
+		u.User,
+		name,
+		id,
+	)
+	return err
+}
+```
+
+If, on the other hand, you want to use the functions provided by the Postgres package, the implementation is different, as you cannot prepare the instructions to be executed:
+
+```go
+func (s *Storage) AddUser(ctx context.Context, u UserRec) error {
+	const stmt = `INSERT INTO users (User, DisplayName, ID) VALUES ($1, $2, $3)`
+	_, err := s.conn.Exec(
+		ctx,
+		stmt,
+		u.User,
+		u.DisplayName,
+		u.ID,
+	)
+	return err
+}
+```
 
 ### Transactions
 
+They are sequences of SQL operations that are executed atomically. A transaction is executed with:
+
+```go
+func (s *Storage) AddOrUpdateUser(ctx context.Context, u UserRec) (err error) {
+	const (
+		getStmt = `SELECT "ID" FROM users WHERE "User" = $1`
+		insertStmt = `INSERT INTO users (User,DisplayName,ID) VALUES ($1, $2, $3)`
+		updateStmt = `UPDATE "users" SET "User" = $1, "DisplayName" = $2 WHERE "ID" = 3`
+	)
+	
+	// Begin the transaction
+	tx, err := s.conn.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return err
+	}
+	defer func() { // Defer is used to commit or rollback the transaction
+		if err != nil { // If there was an error
+			tx.Rollback() // Rollback
+			return
+		}
+		err := tx.Commit() // Otherwise commit
+	}()
+	
+	_, err := tx.QueryRowContext(ctx, getStmt, u.User) // Search for the user by name
+	if err != nil {
+		if err == sql.ErrNoRows { // If no rows were returned
+			// Insert a new row with user, displayName, and ID
+			_, err = tx.ExecContext(ctx, insertStmt, u.User, u.DisplayName, u.ID)
+			if err != nil {
+				return err
+			}
+		}
+		return err
+	}
+	
+	// If the user already exists, update it
+	_, err := tx.ExecContext(ctx, updateStmt, u.User, u.DisplayName, u.ID)
+	return err
+}
+```
+
+A `defer` is a very effective way to handle the `Commit()` or `Rollback()` of the transition.
+
+The isolation level is used to improve database performance and reliability. More resources on isolation levels [here](https://en.wikipedia.org/wiki/Isolation_(database_systems)#Isolation_levels).
+
 ### Postgres' types
 
+Take a Postgres database with two columns:
+
+- An `ID` of type `int`;
+- A `Data` column of type `jsonb`.
+
+`jsonb` is not available in the standard `sql` library, so you will need to use the specific Postgres driver:
+
+```go
+func (s *Storage) AddOrUpdateUser(ctx context.Context, u UserRec) (err error) {
+	const (
+		getStmt = `SELECT "ID" FROM "users" WHERE "ID" = $1`
+		updateStmt = `UPDATE "users" SET "Data" = $1 WHERE "ID" = $2`
+		addStmt = `INSERT INTO "users" (ID,Data) VALUES ($1, $2)`
+	)
+	tx, err := conn.BeginTx(
+		ctx,
+		pgx.TxOptions{
+			IsoLevel: pgx.Serializable,
+			AccessMode: pgx.ReadWrite,
+			DeferableMode: pgx.NotDeferrable
+		},
+	)
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+	
+	// Check if the user with u.ID exists
+	_, err := tx.QueryRow(ctx, getUserStmt, u.ID)
+	if err != nil {
+		if err != sql.ErrNoRows { // If there are no rows
+			// Insert the new user
+			_, err := tx.ExecContext(ctx, insertStmt, u.Id, u)
+			if err != nil {
+				return err
+			}
+		}
+		return err
+	}
+	// Update the user
+	_, err := tx.Exec(ctx, updateStmt, u.ID, u)
+	return err
+}
+```
+
+`pgx` is designed to convert our `UserRec` object into JSON.
+
+Other specific types of Postgres are listed [here](https://www.postgresql.org/docs/9.5/datatype.html).
+
 # ORMs
+
+WIP
