@@ -1298,7 +1298,7 @@ func writeUser(ctx context.Context, w io.Writer, u User) error {
 		return err
 	}
 	return nil
-}	
+}
 ```
 
 ## File path
@@ -1338,6 +1338,7 @@ type FS interface {
 	Open(name string) (File, error)
 }
 ```
+
 It is possible to access a file:
 
 ```go
@@ -1400,7 +1401,7 @@ err := fs.WalkDire(
 
 ## CSV
 
-CSV stands for *Comma Separated Values* and is one of the most common file formats for saving data. Data in a CSV file can be accessed using the `strings` or `bytes` package or the `encoding/csv` package.
+CSV stands for _Comma Separated Values_ and is one of the most common file formats for saving data. Data in a CSV file can be accessed using the `strings` or `bytes` package or the `encoding/csv` package.
 
 ### `strings`
 
@@ -1460,7 +1461,7 @@ func readRecs() ([]record, error) {
 		return nul, err
 	}
 	defer file.Close()
-	
+
 	scanner := bufio.NewScanner(file)
 	var records []record
 	lineNum := 0
@@ -1488,16 +1489,16 @@ func writeRecs(recs []record) error {
 	if err != nil {
 		return err
 	}
-	
+
 	defer file.Close()
-	
+
 	sort.Slice(
 		recs,
 		func(i, j int) bool {
 			return recs[i].last() < recs[j].last()
 		},
 	)
-	
+
 	for _, rec := range recs {
 		_, err := file.Write(rec.csv())
 		if err != nil {
@@ -1523,11 +1524,11 @@ func readRecs() ([]record, error) {
 		return nil, err
 	}
 	defer file.Close()
-	
+
 	reader := csv.NewReader(file) // Pass the file to the constructor
 	reader.FieldPerRecord = 2 // Every record must have two fields
 	reader.TrimLeadingSpace = true // Remove leading spaces
-	
+
 	var recs []record
 	for {
 		data, err := reader.Read()
@@ -1568,25 +1569,25 @@ Microsoft Excel is the best available database. To create and add data to an Exc
 func main() {
 	const sheet = "Sheet1"
 	xlsx := excelise.NewFile() // Create a new Excel file
-	
+
 	// First row
 	xlsx.SetCellValue(sheet, "A1", "Server Name")
 	xlsx.SetCellValue(sheet, "B1", "Generation")
 	xlsx.SetCellValue(sheet, "C1", "Acquisition Date")
 	xlsx.SetCellValue(sheet, "D1", "CPU Vendor")
-	
+
 	// Second row
 	xlsx.SetCellValue(sheet, "A2", "svlaa01")
 	xlsx.SetCellValue(sheet, "B2", 12)
 	xlsx.SetCellValue(sheet, "C2", mustParse("10/27/2021"))
 	xlsx.SetCellValue(sheet, "D2", "Intel")
-	
+
 	// Third row
 	xlsx.SetCellValue(sheet, "A3", "svlac14")
 	xlsx.SetCellValue(sheet, "B3", 13)
 	xlsx.SetCellValue(sheet, "C3", mustParse("12/13/2021"))
 	xlsx.SetCellValue(sheet, "D3", "AMD")
-	
+
 	if err := xlsx.SaveAs("./Book1.xlsx"); err != nil {
 		panic(err)
 	}
@@ -1595,9 +1596,285 @@ func main() {
 
 ## Encoding formats
 
-WIP
+The most common are **JSON** (_JavaScript Object Notation_) and **YAML** (_Yet another Markup Language_).
+
+Go implements a feature called _tags_. You can add a tag, a string, to a field of a struct so that Go can inspect the extra metadata of the field before performing an operation. Tags are key/value pairs:
+
+```go
+type Record struct {
+	Last string `json:"last name"`
+}
+```
+
+In the example, there is a tag with the key `json` and the value `last_name`. You can use the `reflect` package to read these tags.
+
+Tags are widely used to allow packages to change their behavior based on the tag. In the example, the JSON encoder will use last_name instead of Last when writing the JSON.
 
 ### JSON
 
+The `encoding/json` package is used. Since JSON is schema-less, Go allows JSON to be decoded into `[string]interface{}`:
+
+```go
+b, err := os.ReadFile("data.json") // Read data from file
+if err != nil {
+	return "", err
+}
+
+data := map[string]interface{}{} // Map to hold the JSON
+if err := json.Unmarshal(b, &data); err != nil { // Unmarshal the JSON
+	return "", err
+}
+
+v, ok := data["user"] // Search for key `user`
+if !ok {
+	return "", errors.New("json does not contain key `user`")
+}
+switch user := v.(type) {
+case string:
+	return user, nil // Return the associated value if string
+}
+return "", fmt.Errorf("key `user` is not a string, was %T", v)
+```
+
+The opposite operation is performed with:
+
+```go
+if err := json.Marshal(data), err != nil {
+	return err
+}
+```
+
+Mapping JSON data to a `struct` is done with:
+
+```go
+type Record struct {
+	Name string `json:"user_name"` // Name is saved as user_name
+	User string `json:"user"` // User is saved as user
+	ID int
+	Age int `json:"-"`
+}
+
+func main() {
+	rec := Record{
+		Name: "John Doe",
+		User: "jdoe",
+		ID: 23,
+	}
+
+	b, err := json.Marshal(rec)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s\n", b)
+}
+```
+
+The opposite operation is performed with:
+
+```go
+rec := Record{}
+
+if err := rec.Unmarshal(b, &rec); err != nil {
+	return err
+}
+```
+
+When dealing with a series of JSON messages, management is done with `json.Decoder`:
+
+```go
+const jsonStream = `
+	{"Name": "Ed", "Text": "Knock knock."}
+	{"Name": "Sam", "Text": "Who's there?"}
+`
+
+type Message struct {
+	Name, Text string
+}
+
+reader := strings.NewReader(jsonStream) // Build a reader for the stream
+dec := json.NewDecoder(reader) // Pass the reader to the decoder
+msgs := make(chan Message, 1)
+errs := make(chan error, 1)
+
+go func() {
+	defer close(msgs)
+	defer close(errs)
+	for {
+		var m Message
+		if err := dec.Decode(&m); err == io.EOF { // Decode a message
+			break // Termina quando EOF // Exit when EOF
+		} else if err != nil {
+			errs <- err // Propagate the error trough the channel
+			return
+		}
+		msgs <- m // Send the message to the channel
+	}
+}()
+// Print the messages
+for m := range msgs {
+	fmt.Printf("%+v\n", m)
+}
+// Print any error
+if err := <- errs; err != nil {
+	fmt.Println("stream error: ", err)
+}
+```
+
+Internally, `json.Decoder()` calls `json.Unmarshal()`, which is a less efficient method. When you want structs directly, `json.Unmarshal()` is preferable.
+
+If the messages are enclosed in square brackets `[]`, and commas are used as separators, you can use the `dec.Token()` function to remove them:
+
+```go
+const jsonStream = `[
+	{"Name": "Ed", "Text": "Knock knock."},
+	{"Name": "Sam", "Text": "Who's there?"}
+]`
+
+dec := json.Decoder(reader)
+
+_, err := dec.Token() // Read [
+if err != nil {
+	return fmt.Errorf(`outer [ is missing`)
+}
+
+for dec.More() {
+	var m Message
+	err := dec.Decode(&m) // Decode and save in m
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%+v\n", m)
+}
+
+_, err := dec.Token() // Read ]
+if err != nil {
+	return fmt.Errorf(`final ] is missing`)
+}
+```
+
+Writing, on the other hand, is done by writing messages to a `Writer`:
+
+```go
+func encodeMessage(in chan Message, output io.Writer) chan error {
+	errs := make(chan error, 1)
+	go func() {
+		defer close(errs)
+		enc := json.NewEncoder(output) // Bind the encoder to the output writer
+		for msg := range in { // Read messages from the channel
+			if err := enc.Encode(msg); err != nil { // Encode the message
+				errs <- err
+				return
+			}
+		}
+	}()
+	return errs
+}
+```
+
+Other third-party libraries for managing JSON are:
+
+- [gojay](https://github.com/francoispqt/gojay)
+- [go-json](https://github.com/goccy/go-json)
+- [json-iterator](https://pkg.go.dev/github.com/json-iterator/go)
+- [fastjson](https://pkg.go.dev/github.com/valyala/fastjson)
+
 ### YAML
 
+Go does not natively support YAML, but there are libraries such as [`go-yaml`](https://github.com/go-yaml/yaml).
+
+As with `json`, `go-yaml` also has `Marshal` and `Unmarshal` functions:
+
+```go
+data := map[string]interface{}{}
+
+if err := yaml.Unmarshal(yamlContent, &data); err != nil { // Unmarshal the YAML to a map
+	return "", err
+}
+
+v, ok := data["user"]
+if !ok {
+	return "", errors.New("`user` key not found")
+}
+```
+
+```go
+if err := yaml.Marshal(data); err != nil { // Marshal the map to YAML. This discards the result
+	return err
+}
+```
+
+The serialization and deserialization of a `struct` is done with:
+
+```go
+type Config struct {
+	Jobs []Job
+}
+
+type Job struct {
+	Name string
+	Interval time.Duration
+	Cmd string
+}
+
+func main() {
+	c := Config {
+		Jobs: []Job{
+			{
+				Name: "Clear tmp",
+				Interval: 24 * time.Hour,
+				Cmd: "rm -rf " + os.TempDir(),
+			},
+		},
+	}
+
+	b, err := yaml.Marshal(c)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s\n", b)
+}
+```
+
+```go
+data := []byte(`
+jobs:
+  - name: Clear tmp
+	interval: 24h0m0s
+	whatever: is not in the Job type
+	cmd: rm -rf /tmp
+`)
+
+c := Config{}
+// The field `whatever` is ignored because it is not in the Job type
+if err := yaml.Unmarshal(data, &c); err != nil {
+	panic(err)
+}
+for _, job := range c.Jobs {
+	fmt.Println("Name: ", job.Name)
+	fmt.Println("Interval: ", job.Interval)
+}
+```
+
+To cause the function to fail, since the field `whatever` does not belong to `Job`, you can use `UnmarshalStrict()`.
+
+# Interact with remote data structures
+
+We will analyze how to interact with _Structured Query Language_ (**SQL**), _REpresentational State Transfer_ (**REST**), and _Google Remote Procedure Call_ (**gRPC**).
+
+## Database SQL
+
+The package for interacting with SQL databases is in the standard library and is called `database/sql`. This package provides an interface and is therefore another package, called a _driver_, that allows the user to work with multiple databases. The SQL database that will be used is [Postgres](https://www.postgresql.org/).
+
+### Connection
+
+WIP
+
+### Query
+
+### Write
+
+### Transactions
+
+### Postgres' types
+
+# ORMs
