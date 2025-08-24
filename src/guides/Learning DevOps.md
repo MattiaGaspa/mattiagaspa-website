@@ -1,0 +1,141 @@
+---
+title: Learning DevOps
+description: "These notes are based of the book <a href='https://amzn.eu/d/1jenO3w' target='_blank' rel='noopener'><i>Learning DevOps</i></a> by Mikael Krief."
+language: DevOps
+published: true
+---
+
+# The DevOps Culture and Infrastructure as Code practices
+
+DevOps stands for _Development_ and _Operations_. It's a term often associated with the practices of **Continuous Integration** (CI) and **Continuous Development** (CD) and with **Infrastructure as a Code** (IaaC).
+
+## Getting started with DevOps
+
+The term was introduced in 2007-2009, and the term is used to refer to the practices that aim to reduce the barrier between _developers_, who innovate and deliver, and _operations_, who want to guarantee stability.
+
+DevOps is an extension of agile processes. The collaboration between Dev and Ops is achieved by:
+
+- More frequent application development with CI and CD.
+- The implementation and automation of unit and integration tests, which can be **behavior-driven design** (BDD) or **test-driven design** (TDD).
+- Collecting feedback from users.
+- Monitoring applications and infrastructure.
+- Collaboration.
+- Processes: The DevOps process is divided into several phases that are repeated cyclically:
+  - Planning and prioritizing functionalities.
+  - Development.
+  - Continuous integration and delivery.
+  - Continuous deployment.
+  - Continuous monitoring.
+- Tools: Choosing the right tools for the job can close the communication gaps.
+  Developers need to use the Ops tools to detect performance problems as soon as possible, and Operations must automate the process of creating and updating the infrastructure. Furthermore, the DevOps culture can be divided into three axes: the collaboration, the process, and the tools.
+
+![](/Learning-DevOps/1.png)
+
+Donovan Brown's definition of DevOps is:
+
+> "DevOps is the union of people, processes, and products to enable continuous delivery of value to our end users."
+
+The benefits, within an enterprise, of a DevOps culture are:
+
+- Better collaboration and communication in teams.
+- Shorter production times, and thus better performance and end user satisfaction.
+- Reduced infrastructure costs, thanks to IaC.
+- Less time wasted, thanks to iterative cycles, which reduce application errors, and automation tools, which reduce manual tasks.
+
+## Implementing CI/CD and continuous deployment
+
+### Continuous Integration
+
+The definition of CI, by Martin Fowler, is:
+
+> "Continuous integration is a software development practice where members of a team integrate their work frequently... Each integration is verified by an automated build (including test) to detect integration errors as quickly as possible."
+
+So CI is and automatic process that check that the application's code is complete and correct every time a member makes a change.
+
+#### Implementing CI
+
+To set up CI, it is necessary to have a **Source Code Manager** (SCM) that will centralize the code of all members, this manager can be of any types (e.g., git, SVN, etc.). It's also important to have an automatic _build manager_ that supports continuous integration (e.g., Jenkins, GitHub Actions, etc.).
+
+Each team member will work on the application code daily. Then, several times a day, each team member will archive or commit their code, preferably in small commits to easily fix errors. The commits will be integrated into the rest of the code, along with other members' commits, thanks to the CI process.
+
+The CI server, which will execute the CI process, needs to be automated and triggered by each commit. After retrieving the code, the server will:
+
+1. Build the application package.
+2. Perform unit tests, and calculate code coverage.
+   Code that is archived will not be processed by the CI process. Deactivating a test execution must be done if and only if it is necessary to deliver quickly or if the code added in the commit is not essential to the application.
+   CI, however, cannot catch all errors, especially those that happens in production. Therefore, the time needed to fix production errors is taken from the time saved by the CI process.
+
+![](/Learning-DevOps/2.png)
+
+### Continuous Delivery
+
+Continuous Delivery comes after the CI process is passed, and its process is to deploy the application automatically in non-production environments (_staging_).
+
+The process starts from the application package, built by CI, which will be installed through automated tasks. During this phase, it is also possible to execute functional and acceptance tests.
+
+Unlike CI, in CD the application is tested with all of its dependencies. If the application in question is a microservice application, then:
+
+- CI will test the single microservice in development.
+- CD will test and validate the entire application, as well as the APIs.
+
+In practice, CI and CD are linked in an _integrated_ environment, so that the developer can execute unit tests and test the whole application. It's important that the package generated by CI and the package installed in all the environments must be the same; however, configuration files can differ depending on the environment.
+
+The tools necessary for CI/CD are:
+
+- A package manager.
+- A configuration manager: To manage configuration changes in CD.
+  The deployment of the application in each staging environment can be triggered:
+- Automatically: After the successful execution in the previous stage.
+- Manually: In case of a sensitive environment, such as the production one, that may require manual approval from a person responsible for validating the application.
+
+![](/Learning-DevOps/3.png)
+
+### Continuous deployment
+
+It's an extension of CD, it consists of a process that starts with the developer's commit and ends with the deployment in production of the change.
+
+This practice is rarely implemented because it requires a variety of tests to guarantee that the application works. In addition, the continuous deployment process must take into account all of the steps to restore the application in the event of a production problem.
+
+It is used for:
+
+- Toggling features: It permits toggling application's functionalities without the need to redeploy the application.
+- Blue-green production infrastructure: This infrastructure ensures no downtime during deployment. There are 2 environments, one green and one blue; first you deploy to the blue and then to the green.
+
+![](/Learning-DevOps/4.png)
+
+The diagram is the same as CD, but with the difference that it has an automated end-to-end deployment.
+
+### Understanding IaC practices
+
+It's a practice that consists of writing the code for the resources that make up an infrastructure.
+
+This practice is widely used since:
+
+- Deploying infrastructures manually takes a lot of time and there can many manual errors.
+- Scalability is important in cloud computing.
+
+#### Benefits of IaC
+
+- Having a standard infrastructure reduces errors.
+- The code that generates the infrastructure can be versioned.
+- The deployment of the infrastructure is faster, thanks to the integration into the CI/CD pipeline.
+- Reduced costs, management, and control.
+
+#### IaC languages and tools
+
+The languages and tools can be:
+
+- Scripting: This category includes tools such as Bash, PowerShell and clients provided by the cloud provider. The problem with these types of tools is that they require a lot of lines of code.
+- Declarative: These tools allow to define an infrastructure by writing its configuration and properties in a file. Examples are Terraform, Vagrant and Ansible.
+- Programmatic: The infrastructure is programmed with a declarative language, similar to the one used by developers. Examples are Pulumi and Terraform CDK.
+
+#### The IaC topology
+
+There are various IaC typologies:
+
+- Deploying and provisioning the infrastructure: Where you instantiate the resources that make up the infrastructure. They can be of the **Platform-as-a-Service** (PaaS) and the serverless resource types but also the entire network.
+- Server configuration and templating: Where you configure the virtual machines. To optimize the process, it is possible to use server models, called _images_.
+- Containerization: An alternative to deploying applications on VMs. The most used technology is Docker and the containers are configured with a Dockerfile.
+- Configuration and deployment in Kubernetes: Kubernetes is a container orchestrator that deploys containers, manages the network architecture, and handles volume management. It is configured with YAML files.
+
+# Provisioning Cloud Infrastructure with Terraform

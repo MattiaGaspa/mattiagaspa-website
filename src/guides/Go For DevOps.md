@@ -1644,14 +1644,14 @@ if err := json.Marshal(data), err != nil {
 }
 ```
 
-Mapping JSON data to a `struct` is done with:
+Mapping a `struct` to JSON data is done with:
 
 ```go
 type Record struct {
 	Name string `json:"user_name"` // Name is saved as user_name
 	User string `json:"user"` // User is saved as user
 	ID int
-	Age int `json:"-"`
+	Age int `json:"-"` // Age is not saved
 }
 
 func main() {
@@ -1869,7 +1869,7 @@ The package for interacting with SQL databases is in the standard library and is
 
 As mentioned earlier, you must use a driver to access Postgres: `github.com/jackc/pgx`.
 
-The connection to the standard library is made with an anonymous import of  `_ “github.com/jackc/pgx/v4/stdlib”`:
+The connection to the standard library is made with an anonymous import of `_ “github.com/jackc/pgx/v4/stdlib”`:
 
 ```go
 dbURL := "postgres://username:password@localhost:5432/database_name"
@@ -1962,7 +1962,7 @@ func (s *Storage) UsersBetween(ctx context.Context, start, end int) ([]UserRec, 
 	recs := []UserRec{}
 	rows, err := s.usersBetweenStmt.QueryContext(ctx, start, end)
 	defer rows.Close()
-	
+
 	for rows.Next() {
 		rec := UserRec{}
 		if err := rows.Scan(&rec); err != nil {
@@ -2047,7 +2047,7 @@ func (s *Storage) AddOrUpdateUser(ctx context.Context, u UserRec) (err error) {
 		insertStmt = `INSERT INTO users (User,DisplayName,ID) VALUES ($1, $2, $3)`
 		updateStmt = `UPDATE "users" SET "User" = $1, "DisplayName" = $2 WHERE "ID" = 3`
 	)
-	
+
 	// Begin the transaction
 	tx, err := s.conn.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
@@ -2060,7 +2060,7 @@ func (s *Storage) AddOrUpdateUser(ctx context.Context, u UserRec) (err error) {
 		}
 		err := tx.Commit() // Otherwise commit
 	}()
-	
+
 	_, err := tx.QueryRowContext(ctx, getStmt, u.User) // Search for the user by name
 	if err != nil {
 		if err == sql.ErrNoRows { // If no rows were returned
@@ -2072,7 +2072,7 @@ func (s *Storage) AddOrUpdateUser(ctx context.Context, u UserRec) (err error) {
 		}
 		return err
 	}
-	
+
 	// If the user already exists, update it
 	_, err := tx.ExecContext(ctx, updateStmt, u.User, u.DisplayName, u.ID)
 	return err
@@ -2081,7 +2081,7 @@ func (s *Storage) AddOrUpdateUser(ctx context.Context, u UserRec) (err error) {
 
 A `defer` is a very effective way to handle the `Commit()` or `Rollback()` of the transition.
 
-The isolation level is used to improve database performance and reliability. More resources on isolation levels [here](https://en.wikipedia.org/wiki/Isolation_(database_systems)#Isolation_levels).
+The isolation level is used to improve database performance and reliability. More resources on isolation levels [here](<https://en.wikipedia.org/wiki/Isolation_(database_systems)#Isolation_levels>).
 
 ### Postgres' types
 
@@ -2114,7 +2114,7 @@ func (s *Storage) AddOrUpdateUser(ctx context.Context, u UserRec) (err error) {
 		}
 		err = tx.Commit()
 	}()
-	
+
 	// Check if the user with u.ID exists
 	_, err := tx.QueryRow(ctx, getUserStmt, u.ID)
 	if err != nil {
