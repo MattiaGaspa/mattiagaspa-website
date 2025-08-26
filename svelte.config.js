@@ -14,7 +14,18 @@ const mdsvexOptions = {
 			if (!globalHighlighter) {
 				globalHighlighter = await createHighlighter({
 					themes: ['github-dark'],
-					langs: ['bash', 'go', 'java', 'javascript', 'python', 'rust', 'sql', 'typescript', 'xml']
+					langs: [
+						'bash',
+						'go',
+						'java',
+						'javascript',
+						'python',
+						'rust',
+						'sql',
+						'terraform',
+						'typescript',
+						'xml'
+					]
 				});
 				await globalHighlighter.loadLanguage('javascript', 'typescript');
 			}

@@ -94,7 +94,7 @@ The tools necessary for CI/CD are:
 
 It's an extension of CD, it consists of a process that starts with the developer's commit and ends with the deployment in production of the change.
 
-This practice is rarely implemented because it requires a variety of tests to guarantee that the application works. In addition, the continuous deployment process must take into account all of the steps to restore the application in the event of a production problem.
+This practice is rarely implemented because it requires a variety of tests to guarantee that the application works. In addition, the continuous deployment process must take into account all the steps to restore the application in the event of a production problem.
 
 It is used for:
 
@@ -139,3 +139,243 @@ There are various IaC typologies:
 - Configuration and deployment in Kubernetes: Kubernetes is a container orchestrator that deploys containers, manages the network architecture, and handles volume management. It is configured with YAML files.
 
 # Provisioning Cloud Infrastructure with Terraform
+
+Terraform is one of the most popular tools for IaC. In this chapter we will be using Terraform with Azure.
+
+An [Azure subscription](https://azure.microsoft.com/en-us/free/) and a [code editor](https://code.visualstudio.com/) is needed for this chapter.
+
+## Installing Terraform
+
+### Manual installation
+
+- Reach the [download](https://www.terraform.io/downloads.html) page.
+- Unzip and copy the binary into an execution directory.
+- Add that directory to the `PATH` environment variable.
+
+### Installation by script on Linux
+
+The installation on Linux can be done via script or via the `apt` package manager:
+
+- Script installation:
+  ```bash
+  TERRAFORM_VERSION="1.0.0" #Update with your desired version
+  curl -Os https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
+  && curl -Os https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS \
+  && curl https://keybase.io/hashicorp/pgp_keys.asc | gpg --import \
+  && curl -Os https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS.sig \
+  && gpg --verify terraform_${TERRAFORM_VERSION}_SHA256SUMS.sig terraform_${TERRAFORM_VERSION}_SHA256SUMS \
+  && shasum -a 256 -c terraform_${TERRAFORM_VERSION}_SHA256SUMS 2>&1 | grep "${TERRAFORM_VERSION}_linux_amd64.zip:\sOK" \
+  && unzip -o terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /usr/local/bin
+  ```
+- With the `apt` package manager:
+  ```bash
+  sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl \
+  && curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add - \
+  && sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+  && sudo apt-get update && sudo apt-get install terraform
+  ```
+
+### Integrating Terraform with Azure Cloud Shell
+
+Terraform is integrated into the Azure Cloud Shell. The steps to enter the shells are:
+
+- Log in into the [Azure portal](https://portal.azure.com).
+- Open the `Cloud Shell` and choose it's mode: It's either Bash or PowerShell.
+- Run `terraform` from the command shell.
+
+## Configuring Terraform for Azure
+
+To provision in a cloud infrastructure like Azure, we must first configure Terraform to allow the manipulation of resources in an Azure subscription.
+
+To do this, we will create a new Azure **Service Principal** (SP) in Azure **Active Directory** (AD), an _application user_ who has permission to manage Azure resources.
+
+### Creating the Azure SP
+
+This step can be done from the portal or via script with the `az cli` command:
+
+```bash
+az ad sp create-for-rbac --name="<ServicePrincipal name>" --role="Contributor" --scopes="/subscriptions/<subscriptionId>"
+```
+
+This command will return three things:
+
+1. The application ID.
+2. The client secret.
+3. The tenant ID.
+
+The SP is created in Azure AD:
+
+![](/Learning-DevOps/5.png)
+
+### Configuring the Terraform provider
+
+Now, we will configure our Terraform configuration to connect to Azure using this SP:
+
+- In a directory of your choice, create the file `provider.tf` (`.tf` is the extension for Terraform files) and paste the code:
+  ```terraform
+  provider "azurerm" {
+  features {}
+    subscription_id = "<subscription ID>"
+    client_id = "<Client ID>"
+    client_secret = "<Client Secret>"
+    tenant_id = "<Tenant Id>"
+  }
+  ```
+- Since it is not advisable to put identification information in plain text, we will improve the preceding code with:
+  ```terraform
+  provider "azurerm" {
+    features {}
+  }
+  ```
+  And we will pass the identification information through environment variables:
+  - `ARM_SUBSCRIPTION_ID`.
+  - `ARM_CLIENT_ID`.
+  - `ARM_CLIENT_SECRET`.
+  - `ARM_TENANT_ID`.
+
+### The Terraform configuration for local development and testing
+
+To test the Terraform code quickly, it is possible to use your own Azure account. To do this, type `az login` before executing the code.
+
+If there are several subscription you can use the command: `az account set --subscription="<Subscription ID>"`
+
+## Writing a Terraform script to deploy an Azure infrastructure
+
+We will provide a simple Azure architecture with Terraform that is composed of the components:
+
+- Azure resource group.
+- Network configuration: Composed of virtual network and subnet.
+- In this subnet, we will create a VM with a public IP address.
+  This code will be placed in `main.tf`, in the same directory as `provider.tf`.
+
+For the `resource` group:
+
+```terraform
+resource "azurerm_resource_group" "rg" {
+	name = "bookRg"
+	location = "West Europe"
+	tags {
+		environment = "Terraform Azure"
+	}
+}
+```
+
+Any piece of Terraform code is composed of:
+
+- A type of `resource` or `data` block.
+- A name of the resource to be managed (in this case `azurerm_resource_group`).
+- An internal Terraform ID (in this case `rg`).
+- A list of properties of the resource.
+
+For the network interface part:
+
+```terraform
+resource "azurerm_virtual_network" "vnet" {
+	name = "book-vnet"
+	location = "West Europe"
+	address_space = ["10.0.0.0/16"]
+	resource_group_name = azurerm_resource_group.rg.name
+}
+resource "azurerm_subnet" "subnet" {
+	name = "book-subnet"
+	virtual_network_name = azurerm_virtual_network.vnet.name
+	resource_group_name = azurerm_resource_group.rg.name
+	address_prefix = "10.0.10.0/24"
+}
+```
+
+In this code we will create a VNet, `book-vnet`, and a subnet, `book-subnet`. We can also see that for the IDs we use pointers on the Terraform resources.
+
+For provisioning the virtual machine we will need:
+
+- A network interface:
+  ```terraform
+  resource "azurerm_network_interface" "nic" {
+  name = "book-nic"
+  location = "West Europe"
+  resource_group_name = azurerm_resource_group.rg.name
+  ip_configuration {
+  	name = "bookipconfig"
+  	subnet_id = azurerm_subnet.subnet.id
+  	private_ip_address_allocation = "Dynamic"
+  	public_ip_address_id = "azurerm_public_ip.pip.id"
+  }
+  }
+  ```
+- A public IP address:
+  ```terraform
+  resource "azurerm_public_ip" "pip" {
+    name = "book-ip"
+    location = "West Europe"
+    resource_group_name = "${azurerm_resource_group.rg.name}"
+    public_ip_address_allocation = "Dynamic"
+    domain_name_label = "bookdevops"
+  }
+  ```
+- An Azure Storage object for the diagnostics:
+  ```terraform
+  resource "azurerm_storage_account" "stor" {
+    name = "bookstor"
+    location = "West Europe"
+    resource_group_name = azurerm_resource_group.rg.name
+    account_tier = "Standard"
+    account_replicant_type = "LRS"
+  }
+  ```
+  The type of storage, in our case, is Standard LRS.
+- A virtual machine: We will be using an Ubuntu virtual machine:
+  ```terraform
+  resource "azurerm_linux_virtual_machine" "vm" {
+    name = "bookvm"
+    location = "West Europe"
+    resource_group_name = azurerm_resource_group.rg.name
+    vm_size = "Standard_DS1_v2"
+    network_interface_ids = ["${azurerm_network_interface.nic.id}"]
+    storage_image_reference {
+  	  publisher = "Canonical"
+  	  offer = "UbuntuServer"
+  	  sku = "16.04-LTS"
+  	  version = "latest"
+    }
+    ...
+  }
+  ```
+
+The complete source code is available [here](https://github.com/PacktPublishing/Learning-DevOps-Second-Edition/tree/main/CHAP02/terraform_simple_script).
+
+### Following some Terraform good practices
+
+Some good practices for writing good Terraform code are:
+
+- Separate files: Since every file with the `.tf` extension in the `execution` directory will be automatically executed, it is good to separate the code into several files to improve readability:
+  - `Rg.tf`: For the resource group.
+  - `Network.tf`: For the VNet and subnet.
+  - `Compute.tf`: For the network interface, public IP, storage, and VM.
+- Protection of sensitive data: To store sensitive data, such as passwords, it is possible to use Azure Key Vault or HashiCorp Vault. You can then retrieve them via Terraform.
+- Configuration with variables and interpolation functions: Often the infrastructure that will host the application will be the same for all stages. However, some configuration may change from one stage to another. To make the code more flexible we can add variables with the following step:
+  1. Declare the variables by adding the following code in the global Terraform code, or in a separate file `variables.tf`:
+  ```terraform
+  variable "resource_group_name" {
+    description = "Name of the resource group"
+  }
+  variable "location" {
+    description = "Location of the resource"
+    default = "West Europe"
+  }
+  variable "application_name" {
+    description = "Name of the application"
+  }
+  ```
+
+  2. Initiate the values in a `.tfvars` file named `terraform.tfvars`, with the format `variable_name = value`.
+  3. Use the variables in the code with the format `var.<name of the variables>`. For example:
+  ```terraform
+  resource "azurerm_resource_group" "rg" {
+  	name = var.resource_group_name
+  	location = var.location
+  	tags {
+  		environment = "Terraform Azure"
+  	}
+  }
+  ```
+  In addition it is possible to use built-in [functitons](https://www.terraform.io/docs/configuration/functions.html) that can be used to manipulate data or variables.
