@@ -379,3 +379,54 @@ Some good practices for writing good Terraform code are:
   }
   ```
   In addition it is possible to use built-in [functitons](https://www.terraform.io/docs/configuration/functions.html) that can be used to manipulate data or variables.
+
+## Running Terraform for deployment
+
+Now that the configuration is written we can run Terraform and deploy our infrastructure.
+
+However, it is first necessary to provide authentication with the Azure SP to ensure that Terraform can manage the Azure resources. We can do this in two ways:
+
+- Configuring manually the environment variables needed for Terraform:
+  ``` bash
+  export ARM_SUBSCRIPTION_ID=xxxxx-xxxxx-xxxx-xxxx
+  export ARM_CLIENT_ID=xxxxx-xxxxx-xxxx-xxxx
+  export ARM_CLIENT_SECRET=xxxxxxxxxxxxxxxxxx
+  export ARM_TENANT_ID=xxxxx-xxxxx-xxxx-xxxx
+  ```
+- Use the `az cli` with the `login command`.
+  
+First, check that we have an empty Azure subscription without any Azure resource group:
+
+![](/Learning-DevOps/6.png)
+
+### Initialization
+
+The initialization step does the following:
+
+- Initialize the Terraform context and make the connection between the Terraform provider and the remote service, in this case Azure.
+- Download the plugins of the providers, in this case `azurerm`.
+- Check the code variables.
+
+To execute the initialization, run the command:
+
+``` bash
+terraform init
+```
+
+A `.terraform` directory will also be created.
+
+### Previewing the changes
+
+With the `plan` command it is possible to preview the changes made to the infrastructure before applying them.
+
+### Applying the changes
+
+After previewing the changes, we can apply the changes to our infrastructure with the command `apply`.
+
+The Azure resources will look like the following:
+
+![](/Learning-DevOps/7.png)
+
+## Understanding the Terraform life cycle with different command-line options
+
+WIP
