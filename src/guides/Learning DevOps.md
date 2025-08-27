@@ -429,4 +429,29 @@ The Azure resources will look like the following:
 
 ## Understanding the Terraform life cycle with different command-line options
 
-WIP
+As you might have figured out, applying changes to an infrastructure with Terraform involves three commands: `init`, `plan` and `apply`. But there are more commands available.
+
+### Using destroy to better rebuild
+
+To destroy infrastructure previously built with Terraform you need to enter the command `terraform destroy`. This command will destroy only the resources configured in the current Terraform configuration. However, if the Terraform code provides a resource group, it will destroy all of its content.
+
+### Formatting and validating the configuration
+
+The command `terraform fmt` is used to reformat the code in the `.tf` files.
+
+To detect possible errors before running `plan` or `apply`, you can run the command `terraform validate`
+
+### The Terraform life cycle within a CI/CD process
+
+When using Terraform locally, the execution life cycle is as follows:
+
+![](/Learning-DevOps/8.png)
+
+IaC, as applications, must be deployed or executed in an automatic CI/CD process:
+
+![](/Learning-DevOps/9.png)
+
+This is done with slight modifications in the:
+
+- `plan` command: That will look like `terraform plan -out=out.tfplan`.
+- `apply` command: That will look like `terraform apply --auto-approve out.tfplan`. The option `--auto-approve` is also available for the `destroy` command.
