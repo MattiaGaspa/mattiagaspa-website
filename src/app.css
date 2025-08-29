@@ -126,4 +126,21 @@
 		@apply my-8 border-l-4 border-emerald-400 pr-3 pl-7 text-gray-700 italic dark:text-gray-200;
 		font-style: italic;
 	}
+
+	table {
+		@apply my-6 border-collapse overflow-hidden rounded-lg;
+	}
+
+	th,
+	td {
+		@apply border border-gray-300 px-4 py-2 dark:border-gray-700;
+	}
+
+	th {
+		@apply bg-gray-200 text-left font-semibold dark:bg-zinc-800;
+	}
+
+	tr:nth-child(even) {
+		@apply bg-gray-100 dark:bg-zinc-900;
+	}
 }

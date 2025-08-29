@@ -180,7 +180,7 @@ The installation on Linux can be done via script or via the `apt` package manage
 Terraform is integrated into the Azure Cloud Shell. The steps to enter the shells are:
 
 - Log in into the [Azure portal](https://portal.azure.com).
-- Open the `Cloud Shell` and choose it's mode: It's either Bash or PowerShell.
+- Open the `Cloud Shell` and choose its mode: It's either Bash or PowerShell.
 - Run `terraform` from the command shell.
 
 ## Configuring Terraform for Azure
@@ -381,7 +381,7 @@ Some good practices for writing good Terraform code are:
   }
   ```
 
-  In addition it is possible to use built-in [functitons](https://www.terraform.io/docs/configuration/functions.html) that can be used to manipulate data or variables.
+  In addition, it is possible to use built-in [functions](https://www.terraform.io/docs/configuration/functions.html) that can be used to manipulate data or variables.
 
 ## Running Terraform for deployment
 
@@ -468,7 +468,7 @@ When the command `apply` is executed for the first time, Terraform will create a
 - It may contain sensitive data.
 - When using multiple environments, it is necessary to be able to use multiple state files.
 
-To solve this problem, we will store this file in a **remote backend**. In Azure we will use the **azurerm remote backend**. To do this we will:
+To solve this problem, we will store this file in a **remote backend**. In Azure, we will use the **azurerm remote backend**. To do this we will:
 
 1. Create a storage account: through the [portal](https://learn.microsoft.com/en-gb/azure/storage/common/storage-account-create?tabs=azure-portal) or by `az cli`:
    ```bash
