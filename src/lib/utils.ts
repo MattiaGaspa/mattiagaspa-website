@@ -22,5 +22,7 @@ export const icons: Record<string, string> = {
 	Maven:
 		'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fassets.stickpng.com%2Fimages%2F62a78cdae42d729d928b174f.png&f=1&nofb=1&ipt=26e588b4c92976d138ea733ee44b53f7699ab4e00167f549782d516956e3743c',
 	DevOps:
-		'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Flytvynov-production.com%2Fimages%2Fexpertises%2Fdevops%2Fdevops-logo.png&f=1&nofb=1&ipt=3d950b43213b7be4bc6897848729e6a7fbc6120670a629dd1688122d0adfb845'
+		'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Flytvynov-production.com%2Fimages%2Fexpertises%2Fdevops%2Fdevops-logo.png&f=1&nofb=1&ipt=3d950b43213b7be4bc6897848729e6a7fbc6120670a629dd1688122d0adfb845',
+	Azure:
+		'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fswimburger.net%2Fmedia%2Fppnn3pcl%2Fazure.png&f=1&nofb=1&ipt=5812b6d69b3ea62825772c38ffedf993dfe54200261b65a1966b14783a872b95'
 };

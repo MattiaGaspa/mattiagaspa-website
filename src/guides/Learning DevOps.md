@@ -354,6 +354,7 @@ Some good practices for writing good Terraform code are:
 - Protection of sensitive data: To store sensitive data, such as passwords, it is possible to use Azure Key Vault or HashiCorp Vault. You can then retrieve them via Terraform.
 - Configuration with variables and interpolation functions: Often the infrastructure that will host the application will be the same for all stages. However, some configuration may change from one stage to another. To make the code more flexible we can add variables with the following step:
   1. Declare the variables by adding the following code in the global Terraform code, or in a separate file `variables.tf`:
+
   ```terraform
   variable "resource_group_name" {
     description = "Name of the resource group"
@@ -369,6 +370,7 @@ Some good practices for writing good Terraform code are:
 
   2. Initiate the values in a `.tfvars` file named `terraform.tfvars`, with the format `variable_name = value`.
   3. Use the variables in the code with the format `var.<name of the variables>`. For example:
+
   ```terraform
   resource "azurerm_resource_group" "rg" {
   	name = var.resource_group_name
@@ -378,6 +380,7 @@ Some good practices for writing good Terraform code are:
   	}
   }
   ```
+
   In addition it is possible to use built-in [functitons](https://www.terraform.io/docs/configuration/functions.html) that can be used to manipulate data or variables.
 
 ## Running Terraform for deployment
@@ -387,14 +390,14 @@ Now that the configuration is written we can run Terraform and deploy our infras
 However, it is first necessary to provide authentication with the Azure SP to ensure that Terraform can manage the Azure resources. We can do this in two ways:
 
 - Configuring manually the environment variables needed for Terraform:
-  ``` bash
+  ```bash
   export ARM_SUBSCRIPTION_ID=xxxxx-xxxxx-xxxx-xxxx
   export ARM_CLIENT_ID=xxxxx-xxxxx-xxxx-xxxx
   export ARM_CLIENT_SECRET=xxxxxxxxxxxxxxxxxx
   export ARM_TENANT_ID=xxxxx-xxxxx-xxxx-xxxx
   ```
 - Use the `az cli` with the `login command`.
-  
+
 First, check that we have an empty Azure subscription without any Azure resource group:
 
 ![](/Learning-DevOps/6.png)
@@ -409,7 +412,7 @@ The initialization step does the following:
 
 To execute the initialization, run the command:
 
-``` bash
+```bash
 terraform init
 ```
 
@@ -455,3 +458,96 @@ This is done with slight modifications in the:
 
 - `plan` command: That will look like `terraform plan -out=out.tfplan`.
 - `apply` command: That will look like `terraform apply --auto-approve out.tfplan`. The option `--auto-approve` is also available for the `destroy` command.
+
+## Protecting the state file with a remote backend
+
+When the command `apply` is executed for the first time, Terraform will create a `terraform.tfstate` file that contains a JSON representation of the resource properties. This file is really important and must be protected because:
+
+- It contains the status of the infrastructure: Without it, Terraform might not behave as expected, since this file will be used to compare the changes in the resources with the command `plan`.
+- It must be accessible, at the same time, by only the team members.
+- It may contain sensitive data.
+- When using multiple environments, it is necessary to be able to use multiple state files.
+
+To solve this problem, we will store this file in a **remote backend**. In Azure we will use the **azurerm remote backend**. To do this we will:
+
+1. Create a storage account: through the [portal](https://learn.microsoft.com/en-gb/azure/storage/common/storage-account-create?tabs=azure-portal) or by `az cli`:
+   ```bash
+   # Create Resource Group
+   az group --name MyRgRemoteBackend --location westeurope
+   # Create storage account
+   az storage account create --resource-group MyRgRemoteBackend --name storageremotetf --sku Standard_LRS --encryption-services blob
+   # Get the key
+   ACCOUNT_KEY=$(az storage account keys list --resource-group MyRgRemoteBackend --account-name storageremotetf --query [0].value -o tsv)
+   # Create blob container
+   az storage container create --name tfbackends --account-name storageremotetf --account-key $ACCOUNT_KEY
+   ```
+2. Write the Terraform configuration: We configure Terraform to use the previously created remote backend:
+
+   ```terraform
+   terraform {
+      backend "azurerm" {
+   	   storage_account_name = "storageremotetfdemo"
+   	   container_name = "tfbackends"
+   	   key = "myappli.tfstate"
+   	   snapshot  = true
+      }
+   }
+   ```
+
+   To pass the key value to Terraform, we need to set an `ARM_STORAGE_KEY` environment variable with the storage account access key value.
+
+   ![](/Learning-DevOps/10.png)
+
+3. Now, the Terraform can be run with the new remote backend.
+
+If multiple Terraform states are used to manage multiple environments, it's possible to create several remote backend configurations with the code:
+
+```terraform
+terraform {
+	backend "azurerm" {}
+}
+```
+
+And then create several `backend.tfvars` files that contain the properties of the backend:
+
+```terraform
+storage_account_name = "storageremotetf"
+container_name = "tfbackends"
+key = "myappli.tfstate"
+snapshot = true
+```
+
+To specify the backend in the `init` command we write:
+
+```bash
+terraform init -backend-config="backend.tfvars"
+```
+
+# Using Ansible for Configuring IaaS Infrastructure
+
+Now that the infrastructure is provisioned, thanks to Terraform, it is necessary to configure the system and install all the necessary middleware.
+There are several Infrastructure as Code tools available. Ansible, from Red Hat, stands out for its many assets:
+
+- Uses YAML language.
+- Works with one executable.
+- Doesn't require agents on the VMs: It requires only a WinRM connection, for Windows VMs, or an SSH connection, for Linux VMs.
+- Has a template engine and a vault to encrypt/decrypt data.
+- Is idempotent.
+
+Ansible can also be used for infrastructure provisioning, like Terraform, but with YAML configuration.
+
+In this chapter, Ansible will be used to configure a VM with an inventory and a playbook. Technical requirements for this chapter are:
+
+- A Linux OS.
+- Python 2 or 3.
+- [Azure Python SDK](https://docs.microsoft.com/en-us/azure/python/python-sdk-azure-install?view=azure-python): Since in the last section we will run the Ansible dynamic inventory for Azure.
+  The complete source code of this chapter is available [here](https://github.com/PacktPublishing/Learning-DevOps-Second-Edition/tree/main/CHAP03).
+
+## Installing Ansible
+
+WIP
+
+# Useful resources
+
+- [Terraform Azure provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
+- [Terraform registry](https://registry.terraform.io)
