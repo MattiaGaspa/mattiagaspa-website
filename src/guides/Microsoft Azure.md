@@ -145,3 +145,217 @@ To prevent region-level failures, Microsoft has also **Region Pair**: a pair of 
 To prevent errors, updates are first rolled out in one region and then in the other.
 
 A **Geography** contains two or more regions and ensures data residency, sovereignty, resiliency, and compliance requirements are met. Geographies are fault tolerant against region wide failures.
+
+## Resource Management
+
+A **Resource** in Azure is a service, for example: a SQL database, a virtual machine, etc. It's an object used to manage services in Azure and to represent their lifecycle. Every resource is represented as a JSON file.
+
+A **Resource Group** is required to create a new resource in Azure. A resource group is a group of logically related services. Services can be related by:
+
+- Type: For example, a group for all database services, and a group for all virtual machines.
+- Lifecycle: For example, a group for development services, and a group for production services.
+- Department.
+- Billing, location, or a combination of those.
+
+We can create a resource group from the Azure portal by clicking on the _Resource Groups_ section. Then, after clicking _Create_, we need to provide:
+
+- The subscription.
+- The name of the resource group.
+- The location: However, inside you can have services from other regions too.
+
+Resource groups are free. From the resource group's page, inside the _Access Control (IAM)_ section, we can also add roles for managing resources.
+
+Another way to manage Azure resources is through the command line. We log in with the command:
+
+```bash
+az login
+```
+
+At this point, a resource group can be created with the command:
+
+```bash
+az group create --name <group-name> --location "west europe"
+```
+
+Now we can create a resource inside a resource group with the command:
+
+```bash
+az storage account create --name <storage-name> --resource-group <group-name> --location "west europe"
+```
+
+The portal to access the JSON of all the resources can be found [here](https://resources.azure.com).
+
+Resources can be moved from resource group to resource group. resource group cannot be stacked.
+
+A **Resource Manager** is a service that governs and is responsible for all the resources in Azure. It receives commands from:
+
+- Web Portal.
+- REST calls.
+- PowerShell or CLI applications.
+- SDKs.
+  The Azure Resource Manager also interfaces with **Azure Active Directory** (Azure AD) to verify your privileges when performing an action.
+
+# Module 2 - Describe some of the core products available in Azure
+
+## Compute services
+
+**Compute services** are a category of on-demand services used to run cloud-based applications.
+
+_Virtualization_ is the ability to emulate physical machines to separate applications from one another. In Microsoft Azure you can create a virtual machine:
+
+- From a marketplace image (for example: Windows, Ubuntu).
+- From a custom image you build yourself.
+
+**Virtual machines** are IaaS and give you total control over the operating system. A virtual machine can be created easily from the portal. When creating one you need to provide:
+
+- The resource group name.
+- A name and region for the virtual machine.
+- The image: Selected from the drop-down menu.
+- The size: Compute power and RAM.
+- An administrator username and password.
+- Public ports: For later configuration.
+
+The only way to scale a single virtual machine is vertically (by adding more compute power). With **Virtual Machine Scale Sets** (VMSS) you can replicate an image across multiple virtual machines; a load balancer will redirect traffic so all VMs are used evenly. The number of virtual machines can be static or can autoscale, meaning Azure will create more VMs when traffic increases and delete them when traffic decreases.
+
+To reduce maintenance work for virtual machines, you can use **containers**. A container is a sandboxed environment for an application that runs inside a container runtime. Because containers do not require a full OS for each instance, they are more lightweight.
+
+In Azure, we have **Container Instances**: after hosting an image of your application in a container registry, you can deploy it as a container instance. Container Instances are PaaS and are often used for small/simple apps and background jobs. When creating a container instance in the portal you need to provide:
+
+- The resource group name.
+- A name and region for the container.
+- The image source and its location.
+- The size of the container.
+
+**Azure Kubernetes Service** (AKS) is an open-source container orchestration platform that spreads your application image across multiple nodes. A node is a VM that runs containers. Kubernetes provides load balancing to distribute traffic among nodes; the number of nodes can be static or autoscaled.
+
+To further reduce application maintenance, use **App Service**. After packaging your application, you can deploy it to an App Service that provisions the necessary nodes to run the app. App Service is PaaS and supports multiple programming languages and containers. To create an App Service from the portal (choose Web App) you must provide:
+
+- The resource group name.
+- A name for the App Service.
+- The runtime stack: For example Node.js, Python, etc.
+- The operating system and region.
+- The App Service plan/size.
+
+Deployment of a web app can be done from Visual Studio Code using the Azure extension.
+**Azure Functions** (**Function Apps**) let you run small pieces of code as serverless web services. Azure Functions are built on Azure App Service and are serverless because you don’t manage the underlying server. There are two pricing models:
+
+- Consumption-based: you pay for what you use.
+- Dedicated plan.
+
+Azure Functions are designed for micro- and nano-services.
+
+To summarize:
+
+| Solution            | Service | Configuration Control/Maintenance | Autoscaling | Min Nodes | Max Nodes | Scalability |
+| ------------------- | ------- | --------------------------------- | ----------- | --------- | --------- | ----------- |
+| Virtual Machines    | IaaS    | Highest                           | No          | 1         | 1         | Lowest      |
+| VM Scale Sets       | IaaS    | Highest                           | Yes         | 1         | 1000/600  | Highest     |
+| Container Instances | PaaS    | Medium                            | No          | 0         | 20        | Low         |
+| Kubernetes Service  | PaaS    | High                              | Yes         | 3         | 100       | High        |
+| App Service         | PaaS    | Low                               | Yes         | 1         | 20/100    | Medium      |
+| Functions           | PaaS    | Lowest                            | Yes         | 0         | 200       | High        |
+
+Since it's not easy to choose which to use, Microsoft has created a _compute decision flow_:
+
+<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Flearn.microsoft.com%2Fen-us%2Fazure%2Farchitecture%2Fguide%2Ftechnology-choices%2Fimages%2Fcompute-choices-v-2.png&f=1&nofb=1&ipt=bd347eeb85a16f4011256fdb17a5b8b6c8aac53ecf0d8bc867f180b2c55509bc" alt="Compute decision flow" />
+
+## Networking Services
+
+Networking services are a category of services that can:
+
+- Connect cloud and on-premises infrastructure.
+- Protect and monitor other services.
+- Help application delivery.
+
+An **Azure Virtual Network** is an emulation of physical networking infrastructure that allows you to connect cloud resources. A virtual network can be divided into **subnets**:
+
+- To group related resources together.
+- To provide IP addresses.
+
+A virtual network can only reside within a single region. To connect one or more virtual networks together, even if they are not in the same region, you can use:
+
+- VNet peering: With this, the two virtual networks will behave as one.
+- VPN gateway: This allows you to connect to your on‑premises environment. The communication will be encrypted.
+
+Given a virtual machine with its own subnet inside a virtual network, you can control the traffic coming from the Internet to the virtual machine with a **Network Security Group**. Network security groups can also be used to manage traffic between subnets.
+
+In the Azure portal you can create a virtual network by providing:
+
+- The resource group name.
+- The name and region of the virtual network.
+- The IPv4 address space: By default 10.1.0.0 -> 10.1.255.255.
+- A default subnet will be created as well.
+- Next, other Azure services can be enabled: Bastion Host, DDoS protection, and Firewall.
+
+When creating a virtual machine, a virtual network with default settings will be created. From the virtual machine resource page, by typing Diagram, you can see the current networking infrastructure.
+
+The **Azure Load Balancer** is used to distribute traffic among two or more virtual machines. With a single virtual machine, Microsoft guarantees 99.9% availability. By placing two virtual machines in two separate regions and connecting them with a load balancer, Microsoft will guarantee 99.99% availability.
+
+A common practice is to separate virtual machines into tiers:
+
+- Web tier: A load balancer directs traffic from the Internet to the virtual machines that serve web requests. This is called a **public load balancer**, because it has a public IP to receive traffic from outside.
+- Data tier: Another load balancer redirects traffic from the web tier to the virtual machines that handle data. This is called an **internal load balancer**, because it has a private IP to allow communication only within the virtual network.
+
+For web traffic (HTTP/HTTPS), replace the Azure Load Balancer with an **Azure Application Gateway**, which is built for managing web traffic. The Application Gateway can also be used with App Service. Some features of the Application Gateway are:
+
+- Redirection.
+- Affinity: Ensures the same client is routed to the same virtual machine on subsequent requests.
+- URL routing.
+- SSL termination: Converts inbound HTTPS traffic from the Internet to unencrypted HTTP for communication inside the virtual network.
+
+A **Content Delivery Network** (CDN) is used to minimize the latency of web applications. This is achieved by caching and distributing content at POPs (Points of Presence).
+
+## Storage Services
+
+The data that will be saved on Microsoft servers can be:
+
+- Structured data: When the data can be described by a schema. For example: a relational database.
+- Semi-structured data: When the data can be arranged in a table but does not have to follow a strict schema. Often only one column is common to every record and is used to identify the data saved in that row.
+- Unstructured data: When the data is a file, an image, etc. These are often called **blob** (Binary Large OBject).
+
+**Azure Blob Storage** contains one or more containers that are used to store blobs. There are three storage tiers:
+
+- Hot: For frequently accessed data.
+- Cool: For data that is accessed infrequently.
+- Archive: For data that is rarely used.
+
+**Azure Queue Storage** is used to store small pieces of data, called _messages_, that will be consumed in the same order they arrived.
+
+**Azure Table Storage** is a semi-structured (_NoSQL_) store for tables. It is designed for fast access to data.
+
+**Azure File Storage** is similar to blob storage:
+
+- Containers are called _shares_.
+- Blobs are called _files_.
+
+They are almost identical except for the access method: with file storage you access files using the SMB protocol.
+
+**Azure Storage Account** includes all the storage services described above. It offers high durability (11 nines, up to 16 nines) and high scalability (orders of petabytes).
+
+In the portal, you can create a storage account by providing:
+
+- The resource group name.
+- A name and a location for the account.
+- The account kind and the replication.
+- The access tier: Hot or Cold.
+
+From the storage account resource you created, you can see the four storage types:
+
+- Containers.
+- File shares: Microsoft provides an out-of-the-box script to connect to these shares.
+- Tables.
+- Queues.
+
+You can review everything saved in the storage account by opening _Storage Explorer_ from the storage account page.
+
+**Azure Disk Storage** is a disk emulation in the cloud. It is used for persistent storage for virtual machines and comes with different:
+
+- Sizes.
+- Types: SSD or HDD.
+- Performance tiers.
+
+Disks can be unmanaged (each disk is stored as a file on blob storage) or managed.
+
+## Database Services
+
+WIP
