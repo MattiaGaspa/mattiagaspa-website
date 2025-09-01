@@ -358,4 +358,104 @@ Disks can be unmanaged (each disk is stored as a file on blob storage) or manage
 
 ## Database Services
 
-WIP
+**Azure Cosmos DB** is similar to Azure Table Storage. It is a schema-less (_NoSQL_) database that is made of _collections_ (while Table Storage has tables). Another difference is that Cosmos DB can be easily replicated, and you are able to write to your closest replica of the database for the lowest latency.
+
+The database can be accessed with multiple APIs (SQL, MongoDB, etc.).
+
+**Azure SQL Database** is a database organized into tables that follow a specific schema. It is a PaaS, often called DBaaS (Database-as-a-Service), with rich query capabilities (SQL).
+
+The Azure SQL product family consists of:
+
+- **Azure SQL Database**.
+- **Managed Instance**: Use this if you need the full capabilities of SQL Server in the cloud.
+- **SQL Data Warehouse**: Used for massive parallel processing operations.
+- **SQL VM**: SQL Server as IaaS.
+- **DB for MySQL**: Azure-managed database with the MySQL engine.
+- **DB for PostgreSQL**: Azure-managed database with the PostgreSQL engine.
+
+In the Azure portal, to create a database search for _SQL database_ and provide:
+
+- The resource group name.
+- The database name.
+- Select a server, or create a new one by providing a name, the administrator username and password, and the region.
+- Select the performance tier for the SQL database.
+
+In the database _Query editor (preview)_ page you can, after logging in with username and password, edit queries (you may need to whitelist your IP address in the firewall).
+
+## Azure Marketplace
+
+**Azure Marketplace** is like an online store: you search for what you need and then purchase the solution. You can also find third‑party solutions there.
+
+In Azure Marketplace you don't need to pay for licenses directly, since license costs are automatically charged to your Azure account.
+
+All products available in the portal's marketplace can also be found at [here](https://azuremarketplace.microsoft.com/en-us/).
+
+The **Commercial Marketplace** consists of:
+
+- _Azure Marketplace_: Contains Azure-focused products and is aimed at developers and IT professionals.
+- _Microsoft AppSource_: Contains products for Azure, Power BI, Dynamics 365, and Office 365 and is aimed at business users.
+
+# Module 3 - Describe some of the solutions available on Azure
+
+## IoT Services
+
+**Internet of Things (IoT)** is a network of _internet-connected devices_ embedded in everyday objects that send and receive data such as settings and telemetry.
+
+**Azure IoT Hub** is a PaaS that enables bidirectional communication between the cloud and IoT devices. Multiple communication protocols are supported (HTTPS, AMQP, MQTT). It also lets developers monitor and analyze devices through several SDKs.
+
+To simulate IoT devices you can use the Raspberry Pi Azure IoT Online Simulator: [Raspberry Pi Azure IoT Online Simulator](https://azure-samples.github.io/raspberry-pi-web-simulator). In the Azure portal, create an IoT Hub by providing:
+
+- The resource group name.
+- The name and region of the IoT Hub.
+
+To register a device with the IoT Hub, open the IoT Hub resource page and go to the _IoT Devices_ section. To create a new device provide a device ID (other settings remain at their defaults). To connect the device to the hub, copy the _Primary connection string_ into the Raspberry Pi code.
+
+**Azure IoT Central** is a SaaS solution that provides similar capabilities to Azure IoT Hub but also includes templates and a higher-level application platform. Use IoT Central when you prefer not to build the application from scratch.
+
+**Azure Sphere** is a set of components for building secure IoT solutions. Hardware vendors create microcontrollers that follow Microsoft's _Sphere MCU_ standard. Microsoft provides an operating system for these embedded devices, and both Microsoft and developers can apply updates and manage security through the _Azure Sphere Security Service_.
+
+## Big Data & Analytics
+
+**Big Data** is a field that helps with extraction, processing, and analysis of information that is too large or complex for traditional software. How this is done depends on:
+
+- Frequency: How fast we want to process the data. From slowest to fastest: Batch, Periodic, Near Real Time, Real Time.
+- Volume: How big the data is that we need to process.
+- Variety: The types of data we need to process.
+
+When working with data, developers first identify where the data is located (database, file, service) and then _ingest_ the data from the source to the cloud. After transforming the data, they store it and then serve it so customers can benefit from it.
+
+**Azure Synapse Analytics** is a PaaS that provides various tools for each step of this process:
+
+- _Azure Synapse Pipeline_: Used to ingest and transform data with visual workflows.
+- _Apache Spark_.
+- _Synapse SQL_: A parallel-processing database cluster that helps with transformations using SQL queries and allows you to serve the data.
+
+These three tools are available in _Synapse Studio_, so you have everything for transforming data in one place. Synapse Studio is integrated with _Azure Data Lake Storage Gen2_.
+
+**Azure HDInsight** is a PaaS where you can choose from multiple technologies (Hadoop, Kafka, Spark, Hive, Storm, etc.) and Microsoft will manage Big Data clusters for you.
+
+**Azure Databricks** is a PaaS that provides Big Data clusters with _Apache Spark_ to help transform data at large scale.
+
+In the Azure portal, after creating an Azure Databricks resource, you can enter the Databricks workspace by launching it. Inside, you can create clusters and then create scripts in your personal workspace or a shared workspace. When creating a _notebook_ you are prompted to choose a language (Python, Scala, R) and a cluster; you can then write and run code in executable cells.
+
+## Artificial Intelligence
+
+**Artificial Intelligence** is the simulation of human intelligence by computer software. **Machine Learning** is a subcategory of AI where the computer is taught to draw conclusions and make predictions from data.
+
+The process for developing machine learning products involves the cycle:
+
+- Training.
+- Packaging.
+- Validation.
+- Deployment.
+- Monitoring.
+
+**Azure Machine Learning** is used to create new machine learning models and is composed of a set of tools that allow you to:
+
+- Write notebooks in Python or R.
+- Use a visual designer to build machine learning models.
+- Manage compute resources.
+- Determine which algorithm performs best (_AutoML_).
+- Build end-to-end solutions with _pipelines_.
+
+Azure Machine Learning, like Azure Databricks, has its own portal.
