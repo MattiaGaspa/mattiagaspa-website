@@ -24,7 +24,8 @@ const mdsvexOptions = {
 						'sql',
 						'terraform',
 						'typescript',
-						'xml'
+						'xml',
+						'yaml'
 					]
 				});
 				await globalHighlighter.loadLanguage('javascript', 'typescript');

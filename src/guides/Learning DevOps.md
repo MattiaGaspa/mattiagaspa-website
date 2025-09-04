@@ -637,7 +637,7 @@ ansible -i inventory all -u demobook -m ping
 
 Where:
 
-- `-i`: IPath to the inventory file.
+- `-i`: Path to the inventory file.
 - `-u`: Remote username.
 - `-m`: Command to execute.
 
@@ -646,6 +646,171 @@ Where:
 To test connectivity for a single group, replace `all` with the group name
 
 ## Executing the first playbook
+
+### Writing a basic playbook
+
+The code of the playbook is written in YAML. To install an NGINX server on an Ubuntu VM: in the same directory as the inventory file, create a `playbook.yml` file and write:
+
+```yaml
+---
+- hosts: all
+	tasks:
+	- name: install and check nginx latest version
+		apt: name=nginx state=latest
+	- name: start nginx
+		service:
+		name: nginx
+		state: started
+---
+```
+
+In detail:
+
+- YAML files start and end with the optional `---`.
+- `hosts: all` specifies that the configuration will be applied to every host in the inventory file.
+- `tasks:` defines a list of tasks that will be executed. Every task has a `name` property that serves as a label. Under the name we call the function to be executed using _Ansible modules_. We use two modules:
+  - `apt`: To install the latest nginx package.
+  - `service`: To start the nginx service.
+
+Note that you don't need any knowledge of development or IT scripting: you only need to know the list of actions you can perform on VMs to configure them.
+
+### Understanding Ansible modules
+
+There are more than 200 modules provided by Ansible. The complete list can be found [here](https://docs.ansible.com/ansible/latest/collections/index_module.html).
+
+You can also create custom modules and publish them in a private registry internally. More information [here](https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general.html).
+
+### Improving your playbooks with roles
+
+When you need to repeat a task for each application, you can encapsulate the playbook code in a directory called a `role` that can be used by several playbooks.
+
+To create the `nginx` role corresponding to the example, create the file `main.yml`:
+
+```bash
+devopsansible/
+├── inventory
+├── Playbook.yml
+└── roles/
+   └── nginx/
+       └── tasks/
+           └── main.yml
+```
+
+And write:
+
+```yaml
+- name: install and check nginx latest version
+	apt: name=nginx state=latest
+- name: start nginx
+	service:
+	name: nginx
+	state: started
+```
+
+Now, in the `Playbook.yml` file, we can simply write:
+
+```yaml
+---
+- hosts: webserver
+	roles:
+		- nginx
+---
+```
+
+The `nginx` role is now centralized and the same code can be used in several playbooks.
+
+Before creating our own roles, it's better to check [Ansible Galaxy](https://galaxy.ansible.com/). This website contains a large number of roles provided by the community.
+
+## Executing Ansible
+
+The execution of the Ansible playbook is done with:
+
+```bash
+ansible-playbook -i inventory playbook.yml
+```
+
+![](/Learning-DevOps/12.png)
+
+The `PLAY RECAP` will show the status of the hosts:
+
+- `ok`: The number of playbook tasks that have been successfully executed.
+- `changed`: The number of changes that were (or would be) applied.
+- `unreachable`: The host was unreachable.
+- `failed`: The execution failed on the host.
+
+### Using the preview or dry run option
+
+By adding the option `--check`, Ansible does not apply configuration changes to the host. This allows us to preview the changes that would be made to the hosts.
+
+Another important tool for checking a playbook before applying it is **Vagrant** by HashiCorp. Vagrant allows us to create a local test environment composed of VMs to test the effects of our playbook.
+
+### Increasing the log level output
+
+In case of errors, you can add more logs by using these options:
+
+- `-v`: Basic verbose mode.
+- `-vvv`: More verbose output.
+- `-vvvv`: Most verbose output, including connection debugging information.
+
+## Protecting data with Ansible Vault
+
+### Using variables in Ansible for better configuration
+
+When having multiple environments, we can differentiate the properties of the infrastructure by using variables.
+
+Variables are used by writing `{{ variable_name }}` and can be declared and initialized in two ways:
+
+- Inside a `vars:` block: The variable can be accessed by everything that is nested. For example:
+
+  ```yaml
+  - name: Install required software
+    apt: name="{{ packages }}" state=present
+    vars:
+  packages:
+  - python-mysqldb
+  - mysql-server
+  ```
+
+  In this case the variable `packages` can't be accessed by something outside the `apt` module.
+
+- Inside the `group_vars/<group name>`: This way we can dynamically instantiate variables based on which group (inventory group) the host is assigned. For example: to declare the variables `mysql_user` and `mysql_password` for hosts in the `database` group we write:
+  ```yaml
+  # /group_vars/database/main.yml
+  ---
+  mysql_user: mydbuserdef
+  mysql_password: mydbpassworddef
+  ```
+
+More information can be found [here](https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html).
+
+### Protecting sensitive data with Ansible Vault
+
+To encrypt sensitive data, for example the username and password of a database stored in `group_vars/database/main.yml`, you can write:
+
+```bash
+ansible-vault encrypt group_vars/database/main.yml
+```
+
+Ansible will ask for a password that will be needed to decrypt the file. Now the file is no longer readable, you can decrypt it with the command:
+
+```bash
+ansible-vault dencrypt group_vars/database/main.yml
+```
+
+You can also store the password in a `.txt` file located somewhere safe (and not committed) so you don't need to type the password:
+
+```bash
+ansible-vault encrypt group_vars/database/main.yml --vault-password-file ~/.vault_pass.txt
+```
+
+Now the Ansible playbook can be executed in two ways:
+
+```bash
+ansible-playbook -i inventory playbook.yml --ask-vault-pass # Interactive mode
+ansible-playbook -i inventory playbook.yml --vault-password-file ~/.vault_pass.txt # Automatic mode
+```
+
+## Using dynamic inventory for an Azure infrastructure
 
 WIP
 
