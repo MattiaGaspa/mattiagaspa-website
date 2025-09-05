@@ -459,3 +459,22 @@ The process for developing machine learning products involves the cycle:
 - Build end-to-end solutions with _pipelines_.
 
 Azure Machine Learning, like Azure Databricks, has its own portal.
+
+## Serverless Computing
+
+_Serverless Computing_ is a cloud-hosted execution environment that allows customers to run their applications in the cloud while completely abstracting the underlying infrastructure.
+
+**Azure Functions** is a serverless coding platform (Function as a Service, FaaS) where we can design and build nano services and event-based applications. It's a highly scalable service and supports a wide variety of languages and frameworks.
+
+**Azure Logic Apps** (PaaS) allows you to build apps by using a visual workflow that can be triggered from a web request, from an email, from an Office 365 event, etc. The logic apps are created from the _Azure Logic App Designer_.
+
+**Azure Event Grid** is a fully managed serverless event routing service. It uses a _publish-subscribe_ model:
+
+- Applications send **topics** to the Event Grid.
+- The Event Grid then notifies other services that are subscribed.
+
+It is designed for event-based and near-real-time applications.
+
+## DevOps Solutions
+
+WIP

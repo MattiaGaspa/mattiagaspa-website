@@ -175,9 +175,7 @@ The installation on Linux can be done via script or via the `apt` package manage
   && sudo apt-get update && sudo apt-get install terraform
   ```
 
-### Integrating Terraform with Azure Cloud Shell
-
-Terraform is integrated into the Azure Cloud Shell. The steps to enter the shells are:
+Terraform is already integrated into the Azure Cloud Shell. The steps to enter the shells are:
 
 - Log in into the [Azure portal](https://portal.azure.com).
 - Open the `Cloud Shell` and choose its mode: It's either Bash or PowerShell.
@@ -812,7 +810,147 @@ ansible-playbook -i inventory playbook.yml --vault-password-file ~/.vault_pass.t
 
 ## Using dynamic inventory for an Azure infrastructure
 
+In this section we will look at the different ways to use Ansible to configure VMs in Azure.
+
+The first thing to do is create an Azure Service Principal in Azure AD, like we did with Terraform. Then we must export the variables:
+
+```bash
+export AZURE_SUBSCRIPTION_ID=<subscription_id>
+export AZURE_CLIENT_ID=<client ID>
+export AZURE_SECRET=<client Secret>
+export AZURE_TENANT=<tenant ID>
+```
+
+To generate an inventory with groups we will add tags to the VM. To add a tag via command line:
+
+```bash
+az resource tag --tags role=webserver -n VM01 -g demoAnsible --resource-type "Microsoft.Compute/virtualMachines"
+```
+
+This script adds a `role` tag with the value `webserver` to the `VM01` VM.
+
+Install the Ansible Azure collection with the command:
+
+```bash
+ansible-galaxy collection install azure.azcollection
+```
+
+Then, in a file named `inv.azure_rm.yml`, write:
+
+```yaml
+plugin: azure_rm # Use the installed plugin
+include_vm_resource_groups:
+  - demoAnsible # Use only the demoAnsible resource group
+auth_source: auto
+keyed_groups:
+  - key: tags.role # Group the VMs by tag
+leading_separator: false
+```
+
+To display the inventory script in list format type:
+
+```bash
+ansible-inventory -i inv.azure_rm.yml --list
+```
+
+![](/Learning-DevOps/13.png)
+
+Now that we have verified that the dynamic inventory work, we can execute the playbook with the command:
+
+```bash
+ansible-playbook playbook.yaml -i inv.azurerm.yml -u demobook –ask-pass
+```
+
+By using a dynamic inventory, we can take full advantage of the scalability of the cloud with an automatic VM configuration and without having to make any code changes.
+
+# Optimizing Infrastructure Deployment with Packer
+
+Since configuring a VM can be time-consuming and, between each environment or application, there can be middleware with different versions, we will generate a VM image that contains all of the configurations of the VMs. The benefits of this method are:
+
+- The provisioning is very fast.
+- Each VM is uniform in configuration and safe.
+
+One tool that allows one to create VM images from a file is **Packer**, from the HashiCorp tools. Technical requirements for this chapter are:
+
+- An Azure Subscription.
+- Ansible.
+- Terraform.
+
+## An overview of Packer
+
+[Packer](https://developer.hashicorp.com/packer) allows one to build custom VM images from any OS (called a _template_). The VM image configuration is done using a JSON file.
+
+Packer also provides other types of images, for example, Docker and Vagrant.
+
+### Installing Packer
+
+The installation process is similar to Terraform's. It can be done manually or by script.
+
+#### Installing manually
+
+Go to the [download page](https://developer.hashicorp.com/packer/install) and download the package corresponding to your operating system. Unzip, copy the binary into an execution directory, and then update the `PATH` environment variable.
+
+#### Installing by script
+
+To install Packer 1.7.3 on Linux, the script is:
+
+```bash
+PACKER_VERSION="1.7.3" #Update with your desired version
+curl -Os https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip \
+&& curl -Os https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_SHA256SUMS \
+&& curl https://keybase.io/hashicorp/pgp_keys.asc | gpg --import \
+&& curl -Os https://releases.hashicorp.com/ packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_SHA256SUMS.sig \
+&& gpg --verify packer_${PACKER_VERSION}_SHA256SUMS.sig packer_${PACKER_VERSION}_SHA256SUMS \
+&& shasum -a 256 -c packer_${PACKER_VERSION}_SHA256SUMS 2>&1 | grep "${PACKER_VERSION}_linux_amd64.zip:\sOK" \
+&& unzip -o packer_${PACKER_VERSION}_linux_amd64.zip -d /usr/local/bin
+```
+
+If you have the `apt` package manager, you can just add a repository:
+
+```bash
+sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl \
+&& curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add - \
+&& sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+&& sudo apt-get update && sudo apt-get install packer
+```
+
+Packer is already installed in the Azure Cloud Shell.
+
+## Creating Packer templates for Azure VMs with scripts
+
+### The structure of the Packer template
+
+```hcl
+{
+	"variables": {
+		// list of variables
+	},
+	"builders": [
+		{
+			// builders properties
+		}
+	],
+	"provisioners": [
+		{
+			// list of scripts to execute for image provisioning
+		}
+	]
+}
+```
+
+A Packer template is composed of several main sections:
+
+- `builders`.
+- `provisioners`.
+- `variables`.
+
+#### The `builders` section
+
 WIP
+
+#### The `provisioners` section
+
+#### The `variables` section
 
 # Useful resources
 

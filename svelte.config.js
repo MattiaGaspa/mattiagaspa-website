@@ -17,6 +17,7 @@ const mdsvexOptions = {
 					langs: [
 						'bash',
 						'go',
+						'hcl',
 						'java',
 						'javascript',
 						'python',
